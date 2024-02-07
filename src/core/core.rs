@@ -1,6 +1,6 @@
 use std::{
     any,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, Error},
     net::TcpListener,
 };
 
@@ -32,12 +32,17 @@ impl CoreServer {
 }
 
 impl Server for CoreServer {
-    fn get_server_handle(&self) -> std::net::TcpListener {
+    fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
         let complete_address: String = format!("{}:{}", self.host, self.port);
 
         let server_binding = TcpListener::bind(complete_address);
 
-        server_binding.unwrap()
+        let server_binding_status = match server_binding {
+            Ok(v) => Ok(v),
+            Err(e) => Err(e),
+        };
+
+        server_binding_status
     }
 
     fn start(&self, server_handle: std::net::TcpListener) {

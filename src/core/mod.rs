@@ -8,7 +8,7 @@ pub trait Server {
     fn start(&self, server_handle: std::net::TcpListener);
 
     // returns the server handle because y not?
-    fn get_server_handle(&self) -> TcpListener;
+    fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error>;
 
     //  used to check if the total permissible number of the threads
     // exceeds the total system capacity
