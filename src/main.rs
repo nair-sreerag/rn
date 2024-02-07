@@ -1,13 +1,19 @@
+// mod channels;
 mod core;
+// mod thread;
 
-pub use core::Core;
+pub use core::CoreServer;
+use std::{
+    io::{BufRead, BufReader},
+    net::TcpStream,
+};
 
 use crate::core::Server;
 
 fn main() {
     println!("Hello, world!");
 
-    let c = Core::new(String::from("host"), 80, 443, 10);
+    let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10);
 
-    c.start();
+    core_server.start(core_server.get_server_handle());
 }
