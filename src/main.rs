@@ -1,10 +1,11 @@
 // mod channels;
 mod core;
-// mod thread;
+mod pool;
 
 pub use core::CoreServer;
 
 use crate::core::Server;
+pub use pool::CoreThreadPool;
 
 fn main() {
     println!("Hello, world!");

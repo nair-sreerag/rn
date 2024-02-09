@@ -5,6 +5,8 @@ use super::Channel;
 
 pub struct CoreChannel {
     no_of_producers: u32,
+    consumer: "",
+    producers: Vec<>,
 }
 
 // impl CoreChannel {}

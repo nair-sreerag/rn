@@ -2,7 +2,11 @@ use std::{
     any,
     io::{BufRead, BufReader, Error},
     net::TcpListener,
+    sync::mpsc,
+    sync::{mpsc::Receiver, mpsc::Sender, Arc, Mutex},
 };
+
+use crate::CoreThreadPool;
 
 use super::Server;
 
@@ -13,6 +17,9 @@ pub struct CoreServer {
     thread_count: usize,
     // pool: Option<Vec<Wor>>,
     server_handle: Option<()>,
+    sender: Sender<()>,
+    // receiver: Arc<Mutex<Receiver<()>>>,
+    thread_pool: CoreThreadPool,
 }
 
 impl CoreServer {
@@ -21,12 +28,21 @@ impl CoreServer {
 
         println!("Thread count is {}", thread_count);
 
+        let (sender, receiver) = mpsc::channel();
+
+        let rx = Arc::new(Mutex::new(receiver));
+
+        let thread_pool = CoreThreadPool::new(thread_count, rx);
+
         Self {
             host,
             port,
             s_port,
             thread_count,
             server_handle: Some(()),
+            sender,
+            // receiver: rx,
+            thread_pool,
         }
     }
 }
@@ -53,8 +69,6 @@ impl Server for CoreServer {
 
         for l in server_handle.incoming() {
             let stream = l.unwrap();
-
-            println!("Found a function");
 
             self.handle_incoming_request(stream);
         }
