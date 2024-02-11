@@ -8,7 +8,7 @@ use std::{
 
 use crate::CoreThreadPool;
 
-use super::Server;
+use super::{Job, Server};
 
 pub struct CoreServer {
     host: String,
@@ -17,7 +17,7 @@ pub struct CoreServer {
     thread_count: usize,
     // pool: Option<Vec<Wor>>,
     server_handle: Option<()>,
-    sender: Sender<()>,
+    sender: mpsc::Sender<Job>,
     // receiver: Arc<Mutex<Receiver<()>>>,
     thread_pool: CoreThreadPool,
 }
@@ -28,7 +28,7 @@ impl CoreServer {
 
         println!("Thread count is {}", thread_count);
 
-        let (sender, receiver) = mpsc::channel();
+        let (sender, receiver) = mpsc::channel::<Job>();
 
         let rx = Arc::new(Mutex::new(receiver));
 
@@ -44,6 +44,17 @@ impl CoreServer {
             // receiver: rx,
             thread_pool,
         }
+    }
+
+    fn handle_incoming_request(&self, mut stream: std::net::TcpStream) {
+        let buf_reader = BufReader::new(&mut stream);
+        let http_request: Vec<_> = buf_reader
+            .lines()
+            .map(|result| result.unwrap())
+            .take_while(|line| !line.is_empty())
+            .collect();
+
+        println!("Request: {:#?}", http_request);
     }
 }
 
@@ -61,28 +72,25 @@ impl Server for CoreServer {
         server_binding_status
     }
 
-    fn start(&self, server_handle: std::net::TcpListener) {
+    fn start<F>(&self, server_handle: std::net::TcpListener, executor_function: F)
+    where
+        F: FnOnce(std::net::TcpStream) + Send + Copy + 'static,
+    {
         println!(
             "Server is now listening on http://{}:{}",
             self.host, self.port
         );
 
         for l in server_handle.incoming() {
+            println!("got an incoming",);
             let stream = l.unwrap();
 
-            self.handle_incoming_request(stream);
+            // self.handle_incoming_request(stream);
+
+            let job = Box::new(move || executor_function(stream));
+
+            self.sender.send(job).unwrap();
         }
-    }
-
-    fn handle_incoming_request(&self, mut stream: std::net::TcpStream) {
-        let buf_reader = BufReader::new(&mut stream);
-        let http_request: Vec<_> = buf_reader
-            .lines()
-            .map(|result| result.unwrap())
-            .take_while(|line| !line.is_empty())
-            .collect();
-
-        println!("Request: {:#?}", http_request);
     }
 
     fn get_permissible_limit() -> u32 {

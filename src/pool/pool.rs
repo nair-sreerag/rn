@@ -1,5 +1,8 @@
+use crate::core::Job;
+
 use super::ThreadPool;
 use std::{
+    process::id,
     sync::{
         mpsc::{self, Receiver, Sender},
         Arc, Mutex,
@@ -11,7 +14,7 @@ use std::{
 // mpsc code
 pub struct CoreThreadPool {
     name: String,
-    threads: Vec<thread::JoinHandle<()>>,
+    threads: Vec<thread::JoinHandle<Job>>,
     // producer: Sender<()>,
 }
 
@@ -20,20 +23,24 @@ impl CoreThreadPool {
     pub fn new(
         no_of_threads: usize,
         // producer: Sender<()>,
-        consumer: Arc<Mutex<Receiver<()>>>,
+        consumer: Arc<Mutex<Receiver<Job>>>,
     ) -> Self {
-        let mut threads: Vec<thread::JoinHandle<()>> = Vec::new();
+        let mut threads: Vec<thread::JoinHandle<Job>> = Vec::new();
 
-        // TODO: see to its type
-
+        println!("initializing the threads");
         for i in 0..no_of_threads {
             let receiver = Arc::clone(&consumer);
 
             threads.push(thread::spawn(move || loop {
                 let job = receiver.lock().unwrap().recv().unwrap();
 
+                println!(
+                    "request is currently being handled by thread - {:?}",
+                    thread::current().id()
+                );
+
                 // FIXME: this is like this because of the type being passed in JoinHandle?
-                job;
+                job();
             }))
         }
 
