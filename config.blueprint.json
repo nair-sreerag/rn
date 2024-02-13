@@ -1,0 +1,13 @@
+[
+  {
+    "type": "rev/fwd/lb",
+    "match": "",
+    "destinations": [],
+    "certs": []
+  },
+  {
+    "type": "revprox",
+    "match": ""
+  },
+  { "type": "loadbalancer", "match": "" }
+]
