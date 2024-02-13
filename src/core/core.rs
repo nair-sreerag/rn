@@ -1,9 +1,11 @@
 use std::{
     any,
-    io::{BufRead, BufReader, Error},
-    net::TcpListener,
-    sync::mpsc,
-    sync::{mpsc::Receiver, mpsc::Sender, Arc, Mutex},
+    io::{BufRead, BufReader, Error, Write},
+    net::{TcpListener, TcpStream},
+    sync::{
+        mpsc::{self, Receiver, Sender},
+        Arc, Mutex,
+    },
 };
 
 use crate::CoreThreadPool;
@@ -46,7 +48,7 @@ impl CoreServer {
         }
     }
 
-    fn handle_incoming_request(&self, mut stream: std::net::TcpStream) {
+    pub fn handle_incoming_request_impl(mut stream: std::net::TcpStream) {
         let buf_reader = BufReader::new(&mut stream);
         let http_request: Vec<_> = buf_reader
             .lines()
@@ -54,7 +56,27 @@ impl CoreServer {
             .take_while(|line| !line.is_empty())
             .collect();
 
-        println!("Request: {:#?}", http_request);
+        // create a stream to the final destination - fd
+        // forward the entire request to fd and wait for its response
+        // when u get the response, return it back to the calling server
+
+        // returning the response
+
+        // let mut local_server_connection = TcpStream::connect("127.0.0.1:34254")?;
+
+        println!("tolo this ->>> {:?}", http_request);
+
+        // stream.write(http_request.);
+
+        let status_line = "HTTP/1.1 404 NOT FOUND";
+        let contents = String::from("zz");
+        let length = contents.len();
+
+        stream
+            .write_all(
+                format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes(),
+            )
+            .unwrap()
     }
 }
 
@@ -97,5 +119,16 @@ impl Server for CoreServer {
         // TODO: change this
 
         20
+    }
+
+    fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
+        let buf_reader = BufReader::new(&mut stream);
+        let http_request: Vec<_> = buf_reader
+            .lines()
+            .map(|result| result.unwrap())
+            .take_while(|line| !line.is_empty())
+            .collect();
+
+        println!("Request: {:#?}", http_request);
     }
 }

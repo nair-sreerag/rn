@@ -18,18 +18,6 @@ fn main() {
             Ok(server) => server,
             Err(error) => panic!("{}", error),
         },
-        handle_incoming_request,
+        CoreServer::handle_incoming_request_impl,
     );
-}
-
-fn handle_incoming_request(mut stream: std::net::TcpStream) {
-    println!("yoloman");
-    let buf_reader = BufReader::new(&mut stream);
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
-
-    println!("Request: {:#?}", http_request);
 }

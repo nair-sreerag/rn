@@ -21,5 +21,5 @@ pub trait Server {
     // exceeds the total system capacity
     fn get_permissible_limit() -> u32;
 
-    // fn handle_incoming_request(&self, stream: TcpStream);
+    fn handle_incoming_request_server(&self, stream: TcpStream);
 }

@@ -39,7 +39,6 @@ impl CoreThreadPool {
                     thread::current().id()
                 );
 
-                // FIXME: this is like this because of the type being passed in JoinHandle?
                 job();
             }))
         }
