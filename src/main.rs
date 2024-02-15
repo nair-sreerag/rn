@@ -1,6 +1,7 @@
 // mod channels;
 mod core;
 mod pool;
+mod request;
 
 pub use core::CoreServer;
 use std::io::{BufRead, BufReader};
@@ -18,6 +19,6 @@ fn main() {
             Ok(server) => server,
             Err(error) => panic!("{}", error),
         },
-        CoreServer::handle_incoming_request_impl,
+        CoreServer::handle_incoming_request,
     );
 }
