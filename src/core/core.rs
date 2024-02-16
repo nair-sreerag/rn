@@ -12,7 +12,7 @@ use std::{
 use regex::Regex;
 // Content-Length: 101
 
-use crate::CoreThreadPool;
+use crate::{request::CoreRequest, CoreThreadPool};
 
 use super::{Job, Server};
 
@@ -54,160 +54,10 @@ impl CoreServer {
 
     pub fn handle_incoming_request(mut stream: std::net::TcpStream) {
         
-        let mut continue_loop = true;
-
-        let mut collector = Vec::<String>::new();
-
-        let mut line_collector = String::new();
-
-        let mut content_length_bytes: u32 = 0;
-
-        let mut start_collecting_body :bool= false;
-        let mut body_byte_counter: u32 = 0;
-
-        let mut body_collector = String::new();
-
-        let mut found_next_line_symbol: bool = false;
-
-        let mut slice_length_diff: usize = 2;
+        let dude = CoreRequest::new(&stream);
 
 
-        while continue_loop {
-
-            let mut buffer = [0; 1];
-
-            stream.read(&mut buffer);
-            
-            let z = String::from_utf8_lossy(&buffer);
-
-            
-            for character in z.chars() {
-
-                        if start_collecting_body  {
-
-
-                            body_collector.push(character);
-
-                            body_byte_counter += 1;
-
-                            if body_byte_counter == content_length_bytes {
-                                
-                                println!("body collected  {:?}", body_collector);
-
-
-                                continue_loop = false;
-                            }
-
-                           
-                        } else {
-
-                            if character == '\r' {
-                                line_collector.push(character);
-    
-    
-                                if found_next_line_symbol == true {
-                                    slice_length_diff = 4;
-                                    
-                                    } 
-                                }
-                                else if character == '\n'{
-                                    println!("got \\n");
-    
-                                    line_collector.push(character);
-
-    
-                                    if found_next_line_symbol == true  {
-    
-                                        start_collecting_body = true;
-                                        println!("pushing to global collector and flushing the local collector");
-                                        
-
-                                        let regular = Regex::new(r"content-length\s*:\s*(?<name>\d{1,})").unwrap();
-
-                                        match regular.captures(&line_collector.to_lowercase())   {
-                                            // println!("not found yet");
-                                            // return ;
-                    
-                                            Some(g) => { println!("----------------------- got g {:?}", g);
-                                        
-                                            content_length_bytes = g["name"].parse().unwrap();
-                    
-                    
-                                         },
-                                            None => println!("got none in regex")
-                                        };
-
-
-
-                                        collector.push(
-                                            String::from(
-                                                &line_collector[0.. line_collector.len() - slice_length_diff]
-                                            )
-                                        );
-    
-    
-            
-                                        line_collector = String::new();
-                                        slice_length_diff = 2;
-    
-    
-                                        found_next_line_symbol = false;
-    
-                                    } else {
-                                        found_next_line_symbol = true;
-                                    }
-    
-                                }
-                                else {
-    
-                                    if found_next_line_symbol == true  {
-
-                                        let regular = Regex::new(r"content-length\s*:\s*(?<name>\d{1,})").unwrap();
-
-                                        match regular.captures(&line_collector.to_lowercase())   {
-                                            // println!("not found yet");
-                                            // return ;
-                    
-                                            Some(g) => { println!("----------------------- got g {:?}", g);
-                                        
-                                            content_length_bytes = g["name"].parse().unwrap();
-                    
-                    
-                                         },
-                                            None => println!("got none in regex")
-                                        };
-
-
-                                        collector.push(
-                                            String::from(
-                                                &line_collector[0.. line_collector.len() - slice_length_diff]
-                                            )
-                                        );
-
-                                        line_collector = String::new();
-                                        line_collector.push(character);
-
-                                        slice_length_diff = 2;
-    
-    
-                                        found_next_line_symbol = false;
-                                        
-
-                                    } else {
-                                        line_collector.push(character);
-                                    }
-    
-                                }
-    
-    
-                            // println!("slice_length_diff {} and {:?}",slice_length_diff, line_collector);
-                        }
-            }
-
-           
-
-        }
-
+        println!("this is dude : {:?}", dude);
 
     //     let post_body_start = res.find("\r\n\r\n").unwrap_or(0) + 4;
     // let post_body = &res[post_body_start..];
@@ -237,7 +87,6 @@ impl CoreServer {
 
         // println!("req uere {:?}", http_request);
 
-            println!("content_length_bytescontent_length_bytescontent_length_bytescontent_length_bytes {}", content_length_bytes);
 
 
         let mut local_server_connection = TcpStream::connect("127.0.0.1:35577").unwrap();

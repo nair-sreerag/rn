@@ -6,7 +6,7 @@ mod request;
 pub use request::CoreRequest;
 
 pub trait Request {
-    fn transform_request(stream: std::net::TcpStream) -> Vec<String>;
+    fn parse_request(stream: std::net::TcpStream) -> Vec<String>;
 
     // this wont create a new entity; it will
     // just add the required headers and return it back
