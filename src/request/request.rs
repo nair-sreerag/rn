@@ -20,26 +20,32 @@ pub struct CoreRequest {
 }
 
 struct RegexStruct<'a> {
-    name: &'a str,
+    name: RegexExtractors,
     regex: &'a str,
     keys: Vec<&'a str>,
+}
+
+enum RegexExtractors {
+    CONTENT_LENGTH,
+    METHOD_AND_URL,
+    HOST_DATA,
 }
 
 impl CoreRequest {
     pub fn new(mut stream: &std::net::TcpStream) -> Self {
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
-                name: "cl",
+                name: RegexExtractors::CONTENT_LENGTH,
                 regex: r"content-length\s*:\s*(?<name>\d{1,})",
                 keys: vec!["name"],
             },
             RegexStruct {
-                name: "cm",
+                name: RegexExtractors::METHOD_AND_URL,
                 regex: r"(?<http_method>GET|PUT|POST|DELETE|PATCH|HEAD|OPTIONS|TRACE|CONNECT)\s+(?<http_url>.*)\s+HTTP\/(?<http_version>[0-9.]{3,})",
                 keys: vec!["http_method", "http_url", "http_version"],
             },
             RegexStruct {
-                name: "h",
+                name: RegexExtractors::HOST_DATA,
                 regex: r"Host:\s+(?<host_base_url>.*):(?<host_port>.*)",
                 keys: vec!["host_base_url", "host_port"],
             },
@@ -101,7 +107,7 @@ impl CoreRequest {
                                 let expr = Regex::new(r.regex).unwrap();
 
                                 match r.name {
-                                    "cl" => {
+                                    RegexExtractors::CONTENT_LENGTH => {
                                         for c in &collector {
                                             match expr.captures(&c[..].to_lowercase()) {
                                                 Some(some_capture) => {
@@ -115,7 +121,7 @@ impl CoreRequest {
                                         }
                                     }
 
-                                    "cm" => {
+                                    RegexExtractors::METHOD_AND_URL => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -132,7 +138,7 @@ impl CoreRequest {
                                         }
                                     }
 
-                                    "h" => {
+                                    RegexExtractors::HOST_DATA => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -166,18 +172,6 @@ impl CoreRequest {
                     }
                     _ => {
                         if found_next_line_symbol == true {
-                            // match content_length_regex.captures(&line_collector.to_lowercase())
-                            // {
-                            //     // println!("not found yet");
-                            //     // return ;
-                            //     Some(g) => {
-                            //         println!("----------------------- got g {:?}", g);
-
-                            //         content_length_bytes = g["name"].parse().unwrap();
-                            //     }
-                            //     None => println!("got none in regex"),
-                            // };
-
                             collector.push(String::from(
                                 &line_collector[0..line_collector.len() - slice_length_diff],
                             ));
@@ -251,6 +245,26 @@ impl Request for CoreRequest {
 
         Vec::<String>::new()
     }
+
+    // fn replace_headers(
+    //     mut header: &str,
+    //     expression: &str,
+    //     replacement_values: Vec<super::ReplacementStruct>,
+    // ) -> String {
+    //     let regexp = Regex::new(expression).unwrap();
+
+    //     header = regexp.replace_all(&header, |captures| {
+    //         for r in replacement_values {
+
+    //             if let Some(word) = captures[&r.key[..]] {
+
+    //             }
+
+    //         }
+    //     });
+
+    //     String::from(header)
+    // }
 
     // FIXME: DEPR!!
     fn parse_request(mut stream: std::net::TcpStream) -> Vec<String> {
