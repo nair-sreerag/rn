@@ -12,7 +12,7 @@ use std::{
 use regex::Regex;
 // Content-Length: 101
 
-use crate::{request::CoreRequest, CoreThreadPool};
+use crate::{request::{CoreRequest, Request}, CoreThreadPool};
 
 use super::{Job, Server};
 
@@ -56,38 +56,7 @@ impl CoreServer {
         
         let dude = CoreRequest::new(&stream);
 
-
-        println!("this is dude : {:?}", dude);
-
-    //     let post_body_start = res.find("\r\n\r\n").unwrap_or(0) + 4;
-    // let post_body = &res[post_body_start..];
-
-    //     println!(" ->>>> {:?}", post_body);
-
-
-        // let http_request: Vec<_> = buf_reader
-        //     .lines()
-        //     .map(|result| {
-        //         let u  =result.unwrap();
-        //         println!("unwrapped result ->> {} ",u );
-        //         u
-        //     })
-        //     .take_while(|line| {
-
-        //         !line.is_empty()
-        //     })
-        //     .collect();
-
-        // // create a stream to the final destination - fd
-        // // forward the entire request to fd and wait for its response
-        // // when u get the response, return it back to the calling server
-
-        // // returning the response
-
-
-        // println!("req uere {:?}", http_request);
-
-
+        println!("{:?}", dude);
 
         let mut local_server_connection = TcpStream::connect("127.0.0.1:35577").unwrap();
 
@@ -120,21 +89,11 @@ impl CoreServer {
             .write(format!("{}\r\n\r\n",get_request.join("\r\n")).as_bytes())
             .unwrap();
 
-        local_server_connection.read_to_end(&mut response1).unwrap();
 
-        println!("ressss - >>>>> {:?}", std::str::from_utf8(&response1));
-
-        println!("{}", get_request.join("\r\n"));
-
-        let status_line = "HTTP/1.1 404 NOT FOUND";
-        let contents = String::from("zz");
-        let length = contents.len();
-
+        let resp = CoreRequest::new(&local_server_connection, );
         stream
-            .write_all(
-                // format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes(),
-            
-                &response1
+            .write_all(            
+                format!("{}\r\n\r\n{}", resp.headers.join("\r\n"), resp.body).as_bytes()
             )
             .unwrap()
     }
@@ -169,9 +128,11 @@ impl Server for CoreServer {
 
             // self.handle_incoming_request(stream);
 
-            let job = Box::new(move || executor_function(stream));
+            executor_function(stream);
 
-            self.sender.send(job).unwrap();
+            // let job = Box::new(move || executor_function(stream));
+
+            // self.sender.send(job).unwrap();
         }
     }
 
