@@ -1,6 +1,7 @@
 use std::{
     any,
-    io::{BufRead, BufReader, Error, Write},
+    fs::read_to_string,
+    io::{BufRead, BufReader, Error, Read, Write},
     net::{TcpListener, TcpStream},
     sync::{
         mpsc::{self, Receiver, Sender},
@@ -8,7 +9,10 @@ use std::{
     },
 };
 
-use crate::CoreThreadPool;
+use regex::Regex;
+// Content-Length: 101
+
+use crate::{request::{CoreRequest, Request}, CoreThreadPool};
 
 use super::{Job, Server};
 
@@ -48,33 +52,48 @@ impl CoreServer {
         }
     }
 
-    pub fn handle_incoming_request_impl(mut stream: std::net::TcpStream) {
-        let buf_reader = BufReader::new(&mut stream);
-        let http_request: Vec<_> = buf_reader
-            .lines()
-            .map(|result| result.unwrap())
-            .take_while(|line| !line.is_empty())
-            .collect();
+    pub fn handle_incoming_request(mut stream: std::net::TcpStream) {
+        
+        let dude = CoreRequest::new(&stream);
 
-        // create a stream to the final destination - fd
-        // forward the entire request to fd and wait for its response
-        // when u get the response, return it back to the calling server
+        println!("{:?}", dude);
 
-        // returning the response
+        let mut local_server_connection = TcpStream::connect("127.0.0.1:35577").unwrap();
 
-        // let mut local_server_connection = TcpStream::connect("127.0.0.1:34254")?;
+        let get_request = vec![
+            
+    "GET /hello-world HTTP/1.1",
+    "Host: 127.0.0.1:35577",
+    "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
+    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language: en-US,en;q=0.5",
+    "Accept-Encoding: gzip, deflate, br",
+    "DNT: 1",
+    "Connection: keep-alive",
+    "Upgrade-Insecure-Requests: 1",
+    "Sec-Fetch-Dest: document",
+    "Sec-Fetch-Mode: navigate",
+    "Sec-Fetch-Site: none",
+    "Sec-Fetch-User: ?1",
+    "Cache-Control: max-age=0",
+]
+        ;
 
-        println!("tolo this ->>> {:?}", http_request);
+        // println!("tolo this ->>> {:?}", http_request);
 
-        // stream.write(http_request.);
+        // u need to basically
+        // modify the above buf_reader and
 
-        let status_line = "HTTP/1.1 404 NOT FOUND";
-        let contents = String::from("zz");
-        let length = contents.len();
+        let mut response1: Vec<u8> = Vec::<u8>::new();
+        local_server_connection
+            .write(format!("{}\r\n\r\n",get_request.join("\r\n")).as_bytes())
+            .unwrap();
 
+
+        let resp = CoreRequest::new(&local_server_connection, );
         stream
-            .write_all(
-                format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes(),
+            .write_all(            
+                format!("{}\r\n\r\n{}", resp.headers.join("\r\n"), resp.body).as_bytes()
             )
             .unwrap()
     }
@@ -109,9 +128,11 @@ impl Server for CoreServer {
 
             // self.handle_incoming_request(stream);
 
-            let job = Box::new(move || executor_function(stream));
+            executor_function(stream);
 
-            self.sender.send(job).unwrap();
+            // let job = Box::new(move || executor_function(stream));
+
+            // self.sender.send(job).unwrap();
         }
     }
 
@@ -121,14 +142,14 @@ impl Server for CoreServer {
         20
     }
 
-    fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
-        let buf_reader = BufReader::new(&mut stream);
-        let http_request: Vec<_> = buf_reader
-            .lines()
-            .map(|result| result.unwrap())
-            .take_while(|line| !line.is_empty())
-            .collect();
+    // fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
+    //     let buf_reader = BufReader::new(&mut stream);
+    //     let http_request: Vec<_> = buf_reader
+    //         .lines()
+    //         .map(|result| result.unwrap())
+    //         .take_while(|line| !line.is_empty())
+    //         .collect();
 
-        println!("Request: {:#?}", http_request);
-    }
+    //     println!("Request: {:#?}", http_request);
+    // }
 }
