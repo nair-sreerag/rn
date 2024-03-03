@@ -113,28 +113,39 @@ mod tests {
     static PERMISSION_DENIED_FILE_LOCATION: &str = "";
     static PERMISSION_DENIED_FOLDER_LOCATION: &str = "";
 
+    // #[test]
+    // #[should_panic(expected = "Error while opening the file")]
+    // // #[cfg(test)]
+    // fn read_from_an_invalid_location() {
+    //     Utils::read_file(INVALID_FILE_LOCATION, true, true);
+    // }
+
     #[test]
     #[should_panic(expected = "Error while opening the file")]
-    // #[cfg(test)]
-    fn read_from_an_invalid_location() {
-        // match result {
-        //     Err(err) => {
-        //         panic!(err);
-        //     }
-        //     Ok(o) => match o {
-        //         FileReadingReturnTypes::ReturnBufferHandle(buff_handle) => {}
-        //         FileReadingReturnTypes::ReturnEntireFile(entire_file) => {}
-        //     },
-        // }
 
-        Utils::read_file(INVALID_FILE_LOCATION, true, true);
+    fn read_from_an_invalid_location_with_panic_flag_set() {
+        let read_file_result = Utils::read_file(INVALID_FILE_LOCATION, true, false);
+
+        match read_file_result {
+            Ok(_) => {}
+            Err(_) => {}
+        }
     }
 
-    // #[test]
-    // fn read_from_an_invalid_location_with_panic_flag_set() {}
+    #[test]
+    #[should_panic(expected = "No such file or directory (os error 2)")]
+    fn read_from_an_invalid_location_with_panic_flag_unset() {
+        let read_file_result = Utils::read_file(INVALID_FILE_LOCATION, false, false);
 
-    // #[test]
-    // fn read_from_an_invalid_location_with_panic_flag_unset() {}
+        match read_file_result {
+            Ok(_) => {
+                // this case wont run
+            }
+            Err(err) => {
+                std::panic!("{}", err.to_string());
+            }
+        }
+    }
 
     // //  valid string locations after this point
     #[test]
@@ -158,6 +169,28 @@ mod tests {
         match read_file_result {
             FileReadingReturnTypes::ReturnBufferHandle(buffer) => {
                 self::panic!("Unexpected output");
+            }
+            FileReadingReturnTypes::ReturnEntireFile(entire_file) => {
+                assert_eq!(entire_file.as_str(), "Hello, World!\n");
+            }
+        }
+    }
+
+    #[test]
+    fn read_the_entire_stream_and_compare() {
+        let read_file_result = Utils::read_file(VALID_FILE_LOCATION, true, true).unwrap();
+
+        match read_file_result {
+            FileReadingReturnTypes::ReturnBufferHandle(buffer) => {
+                let mut string_collector = String::new();
+
+                for line in buffer.lines() {
+                    let buffered_line = line.unwrap();
+
+                    string_collector.push_str(buffered_line.as_str());
+                }
+
+                assert_eq!(string_collector, "Hello, World!");
             }
             FileReadingReturnTypes::ReturnEntireFile(entire_file) => {
                 assert_eq!(entire_file.as_str(), "Hello, World!\n");
