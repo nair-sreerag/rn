@@ -17,11 +17,9 @@ extern crate playground;
 fn main() {
     println!("Hello, world!");
 
-    let mut rr = playground::round_robin::init(5);
-
-    rr.start();
-
-    return;
+    // let mut rr = playground::round_robin::init(5);
+    // rr.start();
+    // return;
 
     let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10);
 

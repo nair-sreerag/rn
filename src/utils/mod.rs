@@ -117,16 +117,17 @@ mod tests {
     use super::*;
 
     static INVALID_FILE_LOCATION: &str = "";
-    static VALID_FILE_LOCATION: &str = "/home/wwwabcomin/codes/rn/test_file.txt";
+    static VALID_FILE_LOCATION: &str =
+        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_file.txt";
     static FOLDER_LOCATION: &str = "";
     static PERMISSION_DENIED_FILE_LOCATION: &str = "";
     static PERMISSION_DENIED_FOLDER_LOCATION: &str = "";
 
-    static VALID_JSON_FILE_LOCATION: &str = "/home/wwwabcomin/codes/rn/test_json.json";
+    static VALID_JSON_FILE_LOCATION: &str =
+        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_json.json";
 
     #[test]
     #[should_panic(expected = "Error while opening the file")]
-
     fn read_from_an_invalid_location_with_panic_flag_set() {
         let read_file_result = Utils::read_file(INVALID_FILE_LOCATION, true, false);
 
@@ -161,7 +162,7 @@ mod tests {
                 self::panic!("Unexpected output");
             }
             FileReadingReturnTypes::ReturnEntireFile(entire_file) => {
-                assert_eq!(entire_file.as_str(), "Hello, World!\n");
+                assert_eq!(entire_file.as_str(), "If you are seeing this message, then you are reading this properly.\nSome more text...\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus lobortis sapien velit, sit amet bibendum enim maximus eget. Fusce ultricies malesuada libero, sit amet tristique quam fringilla eget. Ut ullamcorper mauris lectus, vel gravida ligula vehicula non. Etiam rhoncus finibus lectus, at cursus odio bibendum non. Pellentesque ex enim, commodo vel erat sed, ultricies aliquam sem. Fusce in purus justo. Nunc odio purus, ullamcorper sed dui ut, fringilla commodo arcu. In consectetur imperdiet lacus, non pharetra nulla laoreet facilisis. Morbi auctor lacus erat, eu volutpat enim iaculis eget. Sed vitae neque in ex tempus cursus. Suspendisse elementum, justo id porttitor efficitur, odio tellus gravida felis, a euismod nibh nulla sed quam. Ut in turpis sed arcu feugiat suscipit a vel elit. Nullam vel lacus non massa ullamcorper pharetra id eget turpis. Vestibulum nec sodales dui. Ut neque diam, convallis at efficitur ut, euismod vitae nulla. Aenean scelerisque at magna eget tempor.\n\nMaecenas quam nisl, interdum id arcu quis, consectetur elementum lacus. Integer sed vulputate purus, vel blandit ligula. Morbi felis neque, viverra eget ornare at, ullamcorper vitae diam. Mauris sed tortor efficitur velit euismod aliquet sed at enim. Morbi interdum mauris ut arcu elementum tristique. Praesent semper libero ac ante fringilla finibus. Phasellus ornare, lectus ut consectetur dignissim, ligula odio ultricies arcu, ac faucibus lacus felis vel neque. Nam nunc augue, convallis at augue finibus, placerat aliquam quam. Pellentesque suscipit neque sed convallis ullamcorper. Donec ultrices sollicitudin sagittis. Curabitur pretium pellentesque semper. Maecenas felis lectus, consequat eget pharetra quis, semper in orci. In at facilisis quam, non lacinia elit. Nunc accumsan congue ex, id finibus enim scelerisque eu. Ut in tempor purus, nec euismod massa.\n");
             }
         }
     }
@@ -175,7 +176,7 @@ mod tests {
                 self::panic!("Unexpected output");
             }
             FileReadingReturnTypes::ReturnEntireFile(entire_file) => {
-                assert_eq!(entire_file.as_str(), "Hello, World!\n");
+                assert_eq!(entire_file.as_str(), "If you are seeing this message, then you are reading this properly.\nSome more text...\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus lobortis sapien velit, sit amet bibendum enim maximus eget. Fusce ultricies malesuada libero, sit amet tristique quam fringilla eget. Ut ullamcorper mauris lectus, vel gravida ligula vehicula non. Etiam rhoncus finibus lectus, at cursus odio bibendum non. Pellentesque ex enim, commodo vel erat sed, ultricies aliquam sem. Fusce in purus justo. Nunc odio purus, ullamcorper sed dui ut, fringilla commodo arcu. In consectetur imperdiet lacus, non pharetra nulla laoreet facilisis. Morbi auctor lacus erat, eu volutpat enim iaculis eget. Sed vitae neque in ex tempus cursus. Suspendisse elementum, justo id porttitor efficitur, odio tellus gravida felis, a euismod nibh nulla sed quam. Ut in turpis sed arcu feugiat suscipit a vel elit. Nullam vel lacus non massa ullamcorper pharetra id eget turpis. Vestibulum nec sodales dui. Ut neque diam, convallis at efficitur ut, euismod vitae nulla. Aenean scelerisque at magna eget tempor.\n\nMaecenas quam nisl, interdum id arcu quis, consectetur elementum lacus. Integer sed vulputate purus, vel blandit ligula. Morbi felis neque, viverra eget ornare at, ullamcorper vitae diam. Mauris sed tortor efficitur velit euismod aliquet sed at enim. Morbi interdum mauris ut arcu elementum tristique. Praesent semper libero ac ante fringilla finibus. Phasellus ornare, lectus ut consectetur dignissim, ligula odio ultricies arcu, ac faucibus lacus felis vel neque. Nam nunc augue, convallis at augue finibus, placerat aliquam quam. Pellentesque suscipit neque sed convallis ullamcorper. Donec ultrices sollicitudin sagittis. Curabitur pretium pellentesque semper. Maecenas felis lectus, consequat eget pharetra quis, semper in orci. In at facilisis quam, non lacinia elit. Nunc accumsan congue ex, id finibus enim scelerisque eu. Ut in tempor purus, nec euismod massa.\n");
             }
         }
     }
@@ -194,17 +195,16 @@ mod tests {
                     string_collector.push_str(buffered_line.as_str());
                 }
 
-                assert_eq!(string_collector, "Hello, World!");
+                assert_eq!(string_collector, "If you are seeing this message, then you are reading this properly.Some more text...Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus lobortis sapien velit, sit amet bibendum enim maximus eget. Fusce ultricies malesuada libero, sit amet tristique quam fringilla eget. Ut ullamcorper mauris lectus, vel gravida ligula vehicula non. Etiam rhoncus finibus lectus, at cursus odio bibendum non. Pellentesque ex enim, commodo vel erat sed, ultricies aliquam sem. Fusce in purus justo. Nunc odio purus, ullamcorper sed dui ut, fringilla commodo arcu. In consectetur imperdiet lacus, non pharetra nulla laoreet facilisis. Morbi auctor lacus erat, eu volutpat enim iaculis eget. Sed vitae neque in ex tempus cursus. Suspendisse elementum, justo id porttitor efficitur, odio tellus gravida felis, a euismod nibh nulla sed quam. Ut in turpis sed arcu feugiat suscipit a vel elit. Nullam vel lacus non massa ullamcorper pharetra id eget turpis. Vestibulum nec sodales dui. Ut neque diam, convallis at efficitur ut, euismod vitae nulla. Aenean scelerisque at magna eget tempor.Maecenas quam nisl, interdum id arcu quis, consectetur elementum lacus. Integer sed vulputate purus, vel blandit ligula. Morbi felis neque, viverra eget ornare at, ullamcorper vitae diam. Mauris sed tortor efficitur velit euismod aliquet sed at enim. Morbi interdum mauris ut arcu elementum tristique. Praesent semper libero ac ante fringilla finibus. Phasellus ornare, lectus ut consectetur dignissim, ligula odio ultricies arcu, ac faucibus lacus felis vel neque. Nam nunc augue, convallis at augue finibus, placerat aliquam quam. Pellentesque suscipit neque sed convallis ullamcorper. Donec ultrices sollicitudin sagittis. Curabitur pretium pellentesque semper. Maecenas felis lectus, consequat eget pharetra quis, semper in orci. In at facilisis quam, non lacinia elit. Nunc accumsan congue ex, id finibus enim scelerisque eu. Ut in tempor purus, nec euismod massa.");
             }
             FileReadingReturnTypes::ReturnEntireFile(entire_file) => {
-                assert_eq!(entire_file.as_str(), "Hello, World!\n");
+                assert_eq!(entire_file.as_str(), "If you are seeing this message, then you are reading this properly.\nSome more text...\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus lobortis sapien velit, sit amet bibendum enim maximus eget. Fusce ultricies malesuada libero, sit amet tristique quam fringilla eget. Ut ullamcorper mauris lectus, vel gravida ligula vehicula non. Etiam rhoncus finibus lectus, at cursus odio bibendum non. Pellentesque ex enim, commodo vel erat sed, ultricies aliquam sem. Fusce in purus justo. Nunc odio purus, ullamcorper sed dui ut, fringilla commodo arcu. In consectetur imperdiet lacus, non pharetra nulla laoreet facilisis. Morbi auctor lacus erat, eu volutpat enim iaculis eget. Sed vitae neque in ex tempus cursus. Suspendisse elementum, justo id porttitor efficitur, odio tellus gravida felis, a euismod nibh nulla sed quam. Ut in turpis sed arcu feugiat suscipit a vel elit. Nullam vel lacus non massa ullamcorper pharetra id eget turpis. Vestibulum nec sodales dui. Ut neque diam, convallis at efficitur ut, euismod vitae nulla. Aenean scelerisque at magna eget tempor.\n\nMaecenas quam nisl, interdum id arcu quis, consectetur elementum lacus. Integer sed vulputate purus, vel blandit ligula. Morbi felis neque, viverra eget ornare at, ullamcorper vitae diam. Mauris sed tortor efficitur velit euismod aliquet sed at enim. Morbi interdum mauris ut arcu elementum tristique. Praesent semper libero ac ante fringilla finibus. Phasellus ornare, lectus ut consectetur dignissim, ligula odio ultricies arcu, ac faucibus lacus felis vel neque. Nam nunc augue, convallis at augue finibus, placerat aliquam quam. Pellentesque suscipit neque sed convallis ullamcorper. Donec ultrices sollicitudin sagittis. Curabitur pretium pellentesque semper. Maecenas felis lectus, consequat eget pharetra quis, semper in orci. In at facilisis quam, non lacinia elit. Nunc accumsan congue ex, id finibus enim scelerisque eu. Ut in tempor purus, nec euismod massa.\n");
             }
         }
     }
 
     #[test]
     #[should_panic(expected = "Error while opening the file")]
-
     fn read_from_folder() {
         let read_file_result: Result<FileReadingReturnTypes, Error> =
             Utils::read_file(FOLDER_LOCATION, true, false);
@@ -221,7 +221,7 @@ mod tests {
     #[test]
     fn try_reading_a_permission_denied_folder() {}
 
-    // tc for writing to a file
+    // test cases for writing to a file
 
     // #[test]
     // fn write_to_a_valid_file() {}
@@ -240,16 +240,24 @@ mod tests {
 
     // tc for parsing to a json
 
+    // #[derive(Serialize, Deserialize, Debug)]
+    // struct JSON_STRUCT_SCHEMA<'a> {
+    //     a: u32,
+    //     b: &'a str,
+    // }
+
     #[derive(Serialize, Deserialize, Debug)]
-    struct X {
+    struct JSON_SCHEMA {
         x: u32,
+        // y: Vec<JSON_STRUCT_SCHEMA<'a>>,
+        z: Vec<i32>,
     }
+
+    // TEST CASES FOR fn parse_to_json()
 
     #[test]
     fn parse_to_a_valid_json() {
-        let result = Utils::parse_to_json::<X>(VALID_JSON_FILE_LOCATION);
-
-        // println!("{:?}", result);
+        let result = Utils::parse_to_json::<JSON_SCHEMA>(VALID_JSON_FILE_LOCATION);
 
         match result {
             Ok(file) => {
