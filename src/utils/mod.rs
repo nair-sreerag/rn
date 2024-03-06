@@ -240,28 +240,38 @@ mod tests {
 
     // tc for parsing to a json
 
-    // #[derive(Serialize, Deserialize, Debug)]
-    // struct JSON_STRUCT_SCHEMA<'a> {
-    //     a: u32,
-    //     b: &'a str,
-    // }
+    #[derive(Serialize, Deserialize, Debug, PartialEq)]
+    struct JSON_STRUCT_SCHEMA {
+        a: u32,
+        b: String,
+    }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, PartialEq)]
     struct JSON_SCHEMA {
         x: u32,
-        // y: Vec<JSON_STRUCT_SCHEMA<'a>>,
+        y: Vec<JSON_STRUCT_SCHEMA>,
         z: Vec<i32>,
     }
 
     // TEST CASES FOR fn parse_to_json()
 
     #[test]
-    fn parse_to_a_valid_json() {
+    fn parse_to_a_valid_json<'a>() {
         let result = Utils::parse_to_json::<JSON_SCHEMA>(VALID_JSON_FILE_LOCATION);
 
         match result {
             Ok(file) => {
-                panic!("{:?}", file);
+                assert_eq!(
+                    file,
+                    JSON_SCHEMA {
+                        x: 2,
+                        z: [1, 2, 3].to_vec(),
+                        y: Vec::from([JSON_STRUCT_SCHEMA {
+                            a: 123,
+                            b: String::from("A name")
+                        }])
+                    }
+                );
             }
             Err(e) => {
                 panic!("{:?}", e)
