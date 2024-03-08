@@ -1,13 +1,14 @@
 use core::panic;
 use std::{
-    fs::{self, File},
-    io::{BufRead, BufReader, Error, Read},
+    fs::{self, File, OpenOptions},
+    io::{BufRead, BufReader, Error, Read, Write},
 };
 
 use serde::Deserialize;
 
 pub struct Utils {}
 
+#[derive(Debug)]
 pub enum FileReadingReturnTypes {
     ReturnEntireFile(String),
     ReturnBufferHandle(BufReader<File>),
@@ -52,19 +53,46 @@ impl Utils {
                 }
             }
         }
-
-        // if file_handle.unwrap().is_err() && panic_if_absent == true {
-        //     println!("Some error while trying to read the file");
-        //     Err(file_handle.err());
-        // } else {
-        //     match streamify {
-        //         true => Ok(BufReader::new(file_handle.unwrap())),
-        //         false => Ok(String::from_utf8_lossy(file_handle.unwrap())),
-        //     }
-        // }
     }
 
-    // pub fn write_to_file(path_to_file: &str, panic_if_absent: bool) {}
+    pub fn write_to_file(
+        file_content: &str,
+        path_to_file: &str,
+        // panic_if_absent: bool,
+        create_if_absent: bool,
+    ) -> Result<bool, Error> {
+        let does_file_exist = Utils::read_file(path_to_file, false, false);
+
+        let file_handle = match does_file_exist {
+            Ok(file_exists) => {
+                let mut file_handle = OpenOptions::new()
+                    .write(true)
+                    .append(true)
+                    .open(path_to_file)
+                    .unwrap();
+
+                file_handle.write_all(file_content.as_bytes())?;
+            }
+            Err(file_doesnt_exist) => match create_if_absent {
+                //create a file or throw error
+                true => {
+                    let mut file_handle = OpenOptions::new()
+                        .write(true)
+                        .append(true)
+                        .open(path_to_file)
+                        .unwrap();
+
+                    file_handle.write_all(file_content.as_bytes())?;
+                }
+                false => {
+                    panic!("Couldn't create file because flag wasn't passed.")
+                    // Ok(false)
+                }
+            },
+        };
+
+        Ok(true)
+    }
 
     // TODO: UNCOMMENT THIS AFTER WRITING THE TEST CASES
     pub fn parse_to_json<json_blue_print>(
@@ -73,21 +101,25 @@ impl Utils {
     where
         json_blue_print: for<'a> Deserialize<'a>,
     {
-        let file_handle = Utils::read_file(path_to_file, true, false).unwrap();
+        // let file_handle = Utils::read_file(path_to_file, true, false).unwrap();
+        let fild_open_attempt_result = Utils::read_file(path_to_file, true, false);
 
-        let file_contents = match file_handle {
-            FileReadingReturnTypes::ReturnBufferHandle(buffer) => {
-                let mut string_collector: String = String::new();
-                for line in buffer.lines() {
-                    string_collector.push_str(&line.unwrap());
+        let file_contents = match fild_open_attempt_result {
+            Ok(file_handle) => match file_handle {
+                FileReadingReturnTypes::ReturnBufferHandle(buffer) => {
+                    let mut string_collector: String = String::new();
+                    for line in buffer.lines() {
+                        string_collector.push_str(&line.unwrap());
+                    }
+
+                    string_collector
                 }
-
-                string_collector
-            }
-            FileReadingReturnTypes::ReturnEntireFile(file_as_string) => {
-                // serde_json::from_str(&file_as_string)
-                file_as_string
-            }
+                FileReadingReturnTypes::ReturnEntireFile(file_as_string) => {
+                    // serde_json::from_str(&file_as_string)
+                    file_as_string
+                }
+            },
+            Err(error) => error.to_string(),
         };
 
         match serde_json::from_str::<json_blue_print>(&file_contents) {
@@ -96,15 +128,6 @@ impl Utils {
         }
     }
 }
-
-// test cases
-// pass an invalid file location
-// // pass a panic flag
-// // dont pass a panic flag
-// // pass a streamify flag
-// // dont pass a streamify flag
-
-// check for the case in which a directory is passed instead of a file
 
 // #[test]
 #[cfg(test)]
@@ -120,11 +143,20 @@ mod tests {
     static VALID_FILE_LOCATION: &str =
         "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_file.txt";
     static FOLDER_LOCATION: &str = "";
+    static INVALID_JSON_FILE_LOCATION: &str =
+        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_invalid_json.json";
+    static VALID_JSON_FILE_LOCATION: &str =
+        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_json.json";
+
     static PERMISSION_DENIED_FILE_LOCATION: &str = "";
     static PERMISSION_DENIED_FOLDER_LOCATION: &str = "";
 
-    static VALID_JSON_FILE_LOCATION: &str =
-        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_json.json";
+    static INVALID_LOCATION_TO_WRITE_FILE: &str = "";
+
+    static VALID_FILE_WRITE_LOCATION: &str =
+        "/Users/nair-sreerag/codes/rn/tests/supporting_files/test_write_file.txt";
+
+    static CONTEND_TO_APPEND: &str = "\n\n\nTHIS IS THE NEW CONTENT";
 
     #[test]
     #[should_panic(expected = "Error while opening the file")]
@@ -221,23 +253,6 @@ mod tests {
     #[test]
     fn try_reading_a_permission_denied_folder() {}
 
-    // test cases for writing to a file
-
-    // #[test]
-    // fn write_to_a_valid_file() {}
-
-    // #[test]
-    // fn write_to_a_file_which_doesnt_exist() {}
-
-    // #[test]
-    // fn write_to_a_folder() {}
-
-    // #[test]
-    // fn write_to_a_readonly_file() {}
-
-    // #[test]
-    // fn write_to_an_invalid_file() {}
-
     // tc for parsing to a json
 
     #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -256,7 +271,7 @@ mod tests {
     // TEST CASES FOR fn parse_to_json()
 
     #[test]
-    fn parse_to_a_valid_json<'a>() {
+    fn parse_to_a_valid_json() {
         let result = Utils::parse_to_json::<JSON_SCHEMA>(VALID_JSON_FILE_LOCATION);
 
         match result {
@@ -279,6 +294,124 @@ mod tests {
         }
     }
 
+    #[test]
+    #[should_panic(expected = "Supplied schema and file contents donot match!")]
+    fn parse_to_an_invalid_json() {
+        let result = Utils::parse_to_json::<JSON_SCHEMA>(INVALID_JSON_FILE_LOCATION);
+
+        match result {
+            Ok(file) => {
+                panic!("This shouldn't have worked!")
+            }
+            Err(err) => {
+                panic!("Supplied schema and file contents donot match!")
+            }
+        }
+    }
+
+    // test cases for writing to a file
+
+    #[test]
+    fn write_to_a_valid_file_and_create_if_absent() {
+        // let response = Utils::write_to_file("THIS IS A FILE CONTENT", VALID_FILE_LOCATION, true);
+
+        let mut og_file_content = String::new();
+        let mut original_file = Utils::read_file(VALID_FILE_WRITE_LOCATION, false, false);
+
+        // read from file and store it in a variable - x
+        // write the new content - appended_string to file f
+        // append appended_string to x
+        // read from the file again
+        // compare and check
+        // write the original string back to the file f
+
+        let mut reading_the_original_file_content: String = String::new();
+        let mut reading_the_newly_written_file: String = String::new();
+
+        // step 1
+        match original_file {
+            Ok(file_reading_response) => match file_reading_response {
+                FileReadingReturnTypes::ReturnEntireFile(entire_file_content) => {
+                    reading_the_original_file_content = entire_file_content.clone();
+                    og_file_content = entire_file_content.clone();
+                }
+                _ => {
+                    panic!("This path should never have been trudged on");
+                }
+            },
+            Err(error) => {
+                panic!("Some error while reading the file");
+            }
+        };
+
+        // step 2
+
+        let mut open_file_handle = OpenOptions::new()
+            .append(true)
+            .write(true)
+            .open(VALID_FILE_WRITE_LOCATION)
+            .unwrap();
+
+        open_file_handle
+            .write_all(CONTEND_TO_APPEND.as_bytes())
+            .unwrap();
+
+        // step 3
+        reading_the_original_file_content.push_str(CONTEND_TO_APPEND);
+
+        // step 4
+
+        let reading_newly_written_file = Utils::read_file(VALID_FILE_WRITE_LOCATION, false, false);
+
+        match reading_newly_written_file {
+            Ok(file_reading_response) => match file_reading_response {
+                FileReadingReturnTypes::ReturnEntireFile(entire_file_content) => {
+                    reading_the_newly_written_file = entire_file_content
+                }
+                _ => {
+                    panic!("This path should never have been trudged on");
+                }
+            },
+            Err(error) => {
+                panic!("Some error while reading the file");
+            }
+        };
+
+        // step 5
+
+        assert_eq!(
+            reading_the_original_file_content,
+            reading_the_newly_written_file
+        );
+
+        // step 6
+
+        open_file_handle = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(VALID_FILE_WRITE_LOCATION)
+            .unwrap();
+
+        open_file_handle.write(og_file_content.as_bytes()).unwrap();
+    }
+
     // #[test]
-    // fn parse_to_an_invalid_json() {}
+    // fn write_to_a_folder() {}
+
+    #[test]
+    #[should_panic(expected = "Invalid argument")]
+    fn write_to_a_readonly_file() {
+        let mut file_handle = OpenOptions::new()
+            .write(false)
+            .append(false)
+            .open(VALID_FILE_WRITE_LOCATION)
+            .unwrap();
+
+        let result = file_handle.write_all(CONTEND_TO_APPEND.as_bytes());
+
+        match result {
+            Ok(result) => {}
+            Err(error) => {}
+        }
+    }
 }
