@@ -12,13 +12,19 @@ use std::{
 use regex::Regex;
 // Content-Length: 101
 
-use crate::{request::{CoreRequest, Request}, CoreThreadPool};
+use crate::{
+    pool::ThreadPool,
+    request::{CoreRequestParser, Request},
+    routing_algos::{rr::RoundRobin, RoutingAlgo},
+    CoreThreadPool,
+};
 
 use super::{Job, Server};
 
-pub struct CoreServer {
+pub struct CoreServer<RoutingType: RoutingAlgo> {
     host: String,
     port: u32,
+
     s_port: u32,
     thread_count: usize,
     // pool: Option<Vec<Wor>>,
@@ -26,10 +32,19 @@ pub struct CoreServer {
     sender: mpsc::Sender<Job>,
     // receiver: Arc<Mutex<Receiver<()>>>,
     thread_pool: CoreThreadPool,
+    algo_name: String,
+
+    x: RoutingType,
 }
 
-impl CoreServer {
-    pub fn new(host: String, port: u32, s_port: u32, thread_count: usize) -> Self {
+impl<RoutingType: RoutingAlgo> CoreServer<RoutingType> {
+    pub fn new(
+        host: String,
+        port: u32,
+        s_port: u32,
+        thread_count: usize,
+        routing_algo: RoutingType,
+    ) -> Self {
         println!("Intializing the server.");
 
         println!("Thread count is {}", thread_count);
@@ -38,48 +53,49 @@ impl CoreServer {
 
         let rx = Arc::new(Mutex::new(receiver));
 
-        let thread_pool = CoreThreadPool::new(thread_count, rx);
-
-
+        let thread_pool = CoreThreadPool::create_threads(thread_count, rx);
 
         Self {
             host,
             port,
             s_port,
             thread_count,
+            // get this from the configuration file passed
             server_handle: Some(()),
             sender,
             // receiver: rx,
             thread_pool,
+
+            // TODO: again, get from the config
+            algo_name: String::from("rr"),
+            x: routing_algo,
         }
     }
 
     pub fn handle_incoming_request(mut stream: std::net::TcpStream) {
-        
-        let dude = CoreRequest::new(&stream);
+        let parsed_incoming_request = CoreRequestParser::new(&stream);
 
-        println!("{:?}", dude);
+        println!("{:?}", parsed_incoming_request);
 
         let mut local_server_connection = TcpStream::connect("127.0.0.1:35577").unwrap();
 
         let get_request = vec![
-            
-    "GET /hello-world HTTP/1.1",
-    "Host: 127.0.0.1:35577",
-    "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-    "Accept-Language: en-US,en;q=0.5",
-    "Accept-Encoding: gzip, deflate, br",
-    "DNT: 1",
-    "Connection: keep-alive",
-    "Upgrade-Insecure-Requests: 1",
-    "Sec-Fetch-Dest: document",
-    "Sec-Fetch-Mode: navigate",
-    "Sec-Fetch-Site: none",
-    "Sec-Fetch-User: ?1",
-    "Cache-Control: max-age=0",
-]
-        ;
+
+                "GET /hello-world HTTP/1.1",
+                "Host: 127.0.0.1:35577",
+                "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:99.0) Gecko/20100101 Firefox/99.0",
+                "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Accept-Language: en-US,en;q=0.5",
+                "Accept-Encoding: gzip, deflate, br",
+                "DNT: 1",
+                "Connection: keep-alive",
+                "Upgrade-Insecure-Requests: 1",
+                "Sec-Fetch-Dest: document",
+                "Sec-Fetch-Mode: navigate",
+                "Sec-Fetch-Site: none",
+                "Sec-Fetch-User: ?1",
+                "Cache-Control: max-age=0",
+            ];
 
         // println!("tolo this ->>> {:?}", http_request);
 
@@ -88,20 +104,17 @@ impl CoreServer {
 
         let mut response1: Vec<u8> = Vec::<u8>::new();
         local_server_connection
-            .write(format!("{}\r\n\r\n",get_request.join("\r\n")).as_bytes())
+            .write(format!("{}\r\n\r\n", get_request.join("\r\n")).as_bytes())
             .unwrap();
 
-
-        let resp = CoreRequest::new(&local_server_connection, );
+        let resp = CoreRequestParser::new(&local_server_connection);
         stream
-            .write_all(            
-                format!("{}\r\n\r\n{}", resp.headers.join("\r\n"), resp.body).as_bytes()
-            )
+            .write_all(format!("{}\r\n\r\n{}", resp.headers.join("\r\n"), resp.body).as_bytes())
             .unwrap()
     }
 }
 
-impl Server for CoreServer {
+impl<R: RoutingAlgo> Server for CoreServer<R> {
     fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
         let complete_address: String = format!("{}:{}", self.host, self.port);
 
@@ -130,11 +143,11 @@ impl Server for CoreServer {
 
             // self.handle_incoming_request(stream);
 
-            executor_function(stream);
+            // executor_function(stream);
 
-            // let job = Box::new(move || executor_function(stream));
+            let job = Box::new(move || executor_function(stream));
 
-            // self.sender.send(job).unwrap();
+            self.sender.send(job).unwrap();
         }
     }
 

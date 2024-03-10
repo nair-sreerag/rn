@@ -18,13 +18,56 @@ pub struct CoreThreadPool {
     // producer: Sender<()>,
 }
 
-impl CoreThreadPool {
-    // TODO: producer and receiver type
-    pub fn new(
-        no_of_threads: usize,
+// impl CoreThreadPool {
+// TODO: producer and receiver type
+// pub fn new(
+//     no_of_threads: usize,
+//     // producer: Sender<()>,
+//     consumer: Arc<Mutex<Receiver<Job>>>,
+// ) -> Self {
+//     let mut threads: Vec<thread::JoinHandle<Job>> = Vec::new();
+
+//     println!("initializing the threads");
+//     for i in 0..no_of_threads {
+//         let receiver = Arc::clone(&consumer);
+
+//         threads.push(thread::spawn(move || loop {
+//             let job = receiver.lock().unwrap().recv().unwrap();
+
+//             println!(
+//                 "request is currently being handled by thread - {:?}",
+//                 thread::current().id()
+//             );
+
+//             job();
+//         }))
+//     }
+
+//     CoreThreadPool {
+//         // TODO: this should be the name of config being taken from
+//         // the conf file
+//         // multiple servers , some with load-balancing capabilities
+//         // can be defined in the config.
+//         // this will take that name so that its easily identifiable
+//         name: String::from("yolo thread pool"),
+//         threads: None,
+//         // producer,
+//     }
+// }
+// }
+
+trait X {}
+
+impl X for Arc<Mutex<Receiver<Job>>> {}
+
+impl ThreadPool for CoreThreadPool {
+    fn create_threads(no_of_threads: usize, consumer: Arc<Mutex<Receiver<Job>>>) -> Self
+// where
+    //     T: X,
+    {
+        // pub fn new(
         // producer: Sender<()>,
-        consumer: Arc<Mutex<Receiver<Job>>>,
-    ) -> Self {
+        // )
         let mut threads: Vec<thread::JoinHandle<Job>> = Vec::new();
 
         println!("initializing the threads");

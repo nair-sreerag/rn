@@ -1,19 +1,14 @@
-const app = require('express')();
+const app = require("express")();
 
-const PORT = 35577;
+const PORT = process.env.PORT || 35577;
 
+app.get("/hello-world", async (req, res) => {
+  console.log("got a request");
 
-app.get('/hello-world', async (req, res) => {
-
-    console.log("got a request");
-
-    return res.json({
-        message: "Hello, world!"
-    })
-
+  return res.json({
+    message: "Hello, world!",
+  });
 });
-
-
 
 // app.get("*", (req, res) => {
 
@@ -25,9 +20,6 @@ app.get('/hello-world', async (req, res) => {
 //     });
 // })
 
-
-
-app.listen(
-    PORT, () => {
-    console.log(`Server running at port ${PORT}`);
-})
+app.listen(PORT, () => {
+  console.log(`Server running at port ${PORT}`);
+});

@@ -1,11 +1,11 @@
 use std::io::{BufRead, BufReader, Read};
 
-use super::Request;
+use super::{Header, Request};
 
 use regex::Regex;
 
 #[derive(Debug)]
-pub struct CoreRequest {
+pub struct CoreRequestParser {
     pub headers: Vec<String>,
     pub url: String,
     // pub host: String,
@@ -31,7 +31,7 @@ enum RegexExtractors {
     HOST_DATA,
 }
 
-impl CoreRequest {
+impl CoreRequestParser {
     pub fn new(mut stream: &std::net::TcpStream) -> Self {
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
@@ -52,7 +52,7 @@ impl CoreRequest {
         ];
 
         let mut collector = Vec::<String>::new();
-        let mut line_collector = String::new();
+        let mut single_line_collector = String::new();
         let mut content_length_bytes: u32 = 0;
         let mut start_collecting_body: bool = false;
         let mut body_byte_counter: u32 = 0;
@@ -82,7 +82,7 @@ impl CoreRequest {
             } else {
                 match character {
                     '\r' => {
-                        line_collector.push(character);
+                        single_line_collector.push(character);
 
                         if found_next_line_symbol == true {
                             slice_length_diff = 4;
@@ -91,7 +91,11 @@ impl CoreRequest {
                     '\n' => {
                         println!("got \\n");
 
-                        line_collector.push(character);
+                        single_line_collector.push(character);
+
+                        // again, this will be true if \n is encountered
+                        // the second time. it also means the next bytes will be the
+                        // content (body) that is being passed in the request
 
                         if found_next_line_symbol == true {
                             start_collecting_body = true;
@@ -100,7 +104,8 @@ impl CoreRequest {
                             );
 
                             collector.push(String::from(
-                                &line_collector[0..line_collector.len() - slice_length_diff],
+                                &single_line_collector
+                                    [0..single_line_collector.len() - slice_length_diff],
                             ));
 
                             for r in &all_regexes {
@@ -160,9 +165,7 @@ impl CoreRequest {
                                 }
                             }
 
-                            // extract the required fields from here itself
-
-                            line_collector = String::new();
+                            single_line_collector = String::new();
                             slice_length_diff = 2;
 
                             found_next_line_symbol = false;
@@ -173,24 +176,25 @@ impl CoreRequest {
                     _ => {
                         if found_next_line_symbol == true {
                             collector.push(String::from(
-                                &line_collector[0..line_collector.len() - slice_length_diff],
+                                &single_line_collector
+                                    [0..single_line_collector.len() - slice_length_diff],
                             ));
 
-                            line_collector = String::new();
-                            line_collector.push(character);
+                            single_line_collector = String::new();
+                            single_line_collector.push(character);
 
                             slice_length_diff = 2;
 
                             found_next_line_symbol = false;
                         } else {
-                            line_collector.push(character);
+                            single_line_collector.push(character);
                         }
                     }
                 }
             }
         }
 
-        CoreRequest {
+        CoreRequestParser {
             headers: collector,
             body: body_collector,
             method: request_method,
@@ -216,20 +220,23 @@ impl CoreRequest {
             ];
             stream.read(&mut buffer).unwrap();
 
-            let x = String::from_utf8_lossy(&buffer);
+            let buffer_to_cow = String::from_utf8_lossy(&buffer);
 
-            let last_char_in_the_stream = x.chars().last().unwrap();
+            let last_char_in_the_stream = buffer_to_cow.chars().last().unwrap();
 
             if last_char_in_the_stream == '\0' {
-                let parsed_string: String =
-                    x.chars().take_while(|c| *c != '\0').collect::<String>();
+                let parsed_string: String = buffer_to_cow
+                    .chars()
+                    // '\0' marks the end of the request as a whole
+                    .take_while(|c| *c != '\0')
+                    .collect::<String>();
 
                 parsed_stream.push_str(&parsed_string);
 
                 println!("breaking");
                 break;
             } else {
-                let cow_to_string = x.into_owned();
+                let cow_to_string = buffer_to_cow.into_owned();
 
                 parsed_stream.push_str(&cow_to_string);
             }
@@ -239,11 +246,15 @@ impl CoreRequest {
     }
 }
 
-impl Request for CoreRequest {
-    fn add_headers(request_array: Vec<String>, header_string: Vec<String>) -> Vec<String> {
+impl Request for CoreRequestParser {
+    fn add_headers(&self, headers_to_add: Vec<Header>) -> Self {
         // TODO: implement this
 
-        Vec::<String>::new()
+        for header in headers_to_add {
+            self.headers.push(format!("{}: {}",));
+        }
+
+        *self
     }
 
     // fn replace_headers(
@@ -266,22 +277,33 @@ impl Request for CoreRequest {
     //     String::from(header)
     // }
 
-    // FIXME: DEPR!!
-    fn parse_request(mut stream: std::net::TcpStream) -> Vec<String> {
-        let buf_reader = BufReader::new(&mut stream);
+    // // FIXME: DEPR!!
+    // fn parse_request(mut stream: std::net::TcpStream) -> Vec<String> {
+    //     let buf_reader = BufReader::new(&mut stream);
 
-        // this should handle different use cases
-        //  for example when the POST request has a body,
-        // u need to parse that separately after the perceived
-        // terminator \r\n\r\n of a normal get request.
-        //PS.  it marks the end of the headers section of any request
+    //     // this should handle different use cases
+    //     //  for example when the POST request has a body,
+    //     // u need to parse that separately after the perceived
+    //     // terminator \r\n\r\n of a normal get request.
+    //     //PS.  it marks the end of the headers section of any request
 
-        // use the content length to find out how much the size of data is
+    //     // use the content length to find out how much the size of data is
 
-        buf_reader
-            .lines()
-            .map(|result| result.unwrap())
-            .take_while(|line| !line.is_empty())
-            .collect()
-    }
+    //     buf_reader
+    //         .lines()
+    //         .map(|result| result.unwrap())
+    //         .take_while(|line| !line.is_empty())
+    //         .collect()
+    // }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    // WILL NEED TO SIMULATE AN HTTP REQUEST
+
+    // check if basic parsing works or not
+    // check if add_headers() works or not
 }
