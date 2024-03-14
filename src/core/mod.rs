@@ -4,7 +4,7 @@ use std::net::{TcpListener, TcpStream};
 mod types;
 
 pub use core::CoreServer;
-pub use types::Job;
+pub use types::*;
 
 pub trait Server {
     // starts the server

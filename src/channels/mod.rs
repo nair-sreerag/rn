@@ -1,6 +1,5 @@
 mod channels;
 
 pub trait Channel {
-    // TODO: this should return something
-    fn create_mpsc();
+    fn create_mpsc(&self, no_of_required_producers: u32) -> Self;
 }

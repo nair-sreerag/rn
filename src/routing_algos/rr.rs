@@ -18,7 +18,7 @@ pub struct RoundRobin {
 }
 
 impl RoutingAlgo for RoundRobin {
-    fn new(thread_pool: Arc<Mutex<Receiver<Job>>>) -> Self {
+    fn new<X>(thread_pool: X) -> Self {
         let mut thread_initializer: Vec<Thread> = Vec::new();
 
         // for i in 0..thread_pool.len() {

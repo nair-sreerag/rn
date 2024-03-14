@@ -1,44 +1,47 @@
-// mod channels;
+mod channels;
 mod core;
-mod pool;
-mod request;
-mod utils;
+mod thread_pool;
+// mod request;
+// mod utils;
+// pub use thread_pool::CoreThreadPool;
 
 mod routing_algos;
 
-pub use core::CoreServer;
-use std::io::{BufRead, BufReader};
+// pub use core::CoreServer;
+// use std::io::{BufRead, BufReader};
 
-use crate::{core::Server, routing_algos::RoutingAlgo};
-pub use pool::CoreThreadPool;
+// use crate::{core::Server, routing_algos::RoutingAlgo};
 
 // extern crate playground;
 
-use routing_algos::{default, lc, lru, rr, wrr, ALGO_TYPES};
+// use routing_algos::{default, lc, lru, rr, wrr, ALGO_TYPES};
 
 fn main() {
-    println!("Hello, world!");
+    // println!("Hello, world!");
 
-    let algo: ALGO_TYPES = ALGO_TYPES::Default;
+    // let algo: ALGO_TYPES = ALGO_TYPES::Default;
 
-    let mut routing_algo: dyn RoutingAlgo;
+    // let mut routing_algo;
 
-    match algo {
-        ALGO_TYPES::Default => {}
-        ALGO_TYPES::LeastConnection => {}
-        ALGO_TYPES::RoundRobin => routing_algo = rr::RoundRobin::new(),
-        ALGO_TYPES::WeightedRoundRobin => {}
-        ALGO_TYPES::LeastRecentlyUsed => {}
-    }
+    // // check the number of threads that can be made
+    // // and pass it to the routing algos below
 
-    let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10, routing_algo);
+    // match algo {
+    //     ALGO_TYPES::Default => {}
+    //     ALGO_TYPES::LeastConnection => {}
+    //     ALGO_TYPES::RoundRobin => routing_algo = rr::RoundRobin::new(),
+    //     ALGO_TYPES::WeightedRoundRobin => {}
+    //     ALGO_TYPES::LeastRecentlyUsed => {}
+    // }
 
-    core_server.start(
-        match core_server.get_server_handle() {
-            Ok(server) => server,
-            Err(error) => panic!("{}", error),
-        },
-        CoreServer::handle_incoming_request,
-        // core_server.handle_incoming_request(),
-    );
+    // let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10, routing_algo);
+
+    // core_server.start(
+    //     match core_server.get_server_handle() {
+    //         Ok(server) => server,
+    //         Err(error) => panic!("{}", error),
+    //     },
+    //     CoreServer::handle_incoming_request,
+    // core_server.handle_incoming_request(),
+    // );
 }

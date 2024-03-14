@@ -1,10 +1,10 @@
-use crate::pool::ThreadPool;
+use crate::thread_pool::ThreadPool;
 
 pub mod default;
-pub mod lc;
-pub mod lru;
-pub mod rr;
-pub mod wrr;
+// pub mod lc;
+// pub mod lru;
+// pub mod rr;
+// pub mod wrr;
 
 pub enum ALGO_TYPES {
     RoundRobin,
@@ -14,11 +14,19 @@ pub enum ALGO_TYPES {
     Default,
 }
 
-pub trait RoutingAlgo {
-    fn new<ThreadPoolType: ThreadPool>(thread_pool: ThreadPoolType) -> Self;
+pub enum ThreadCollector {
+    SimulatedThreadPool(Vec<String>),
+    ActualThreadPool(),
+}
 
-    fn start(&self) -> ();
+pub trait RoutingAlgo {
+    // this will initialize the algo
+    fn new<X>(mpsc_channel: X, thread_pool: ThreadCollector) -> Self;
+
+    // this will run it
+    // fn start(&self) -> ();
 
     // fn handle_incoming_request() -> ();
-    fn assign_to_thread();
+    // fn assign_to_thread(// mut stream
+    // ) -> bool;
 }
