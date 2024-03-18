@@ -13,31 +13,30 @@ use regex::Regex;
 // Content-Length: 101
 
 use crate::{
-    pool::ThreadPool,
     request::{CoreRequestParser, Request},
-    routing_algos::{rr::RoundRobin, RoutingAlgo},
+    routing_algos::RoutingAlgo,
+    thread_pool::ThreadPool,
     CoreThreadPool,
 };
 
 use super::{Job, Server};
 
-pub struct CoreServer<RoutingType: RoutingAlgo> {
+pub struct CoreServer<RoutingType: RoutingAlgo, JobType> {
     host: String,
     port: u32,
 
     s_port: u32,
     thread_count: usize,
-    // pool: Option<Vec<Wor>>,
     server_handle: Option<()>,
-    sender: mpsc::Sender<Job>,
+    sender: mpsc::Sender<JobType>,
     // receiver: Arc<Mutex<Receiver<()>>>,
-    thread_pool: CoreThreadPool,
+    thread_pool: CoreThreadPool<Job>,
     algo_name: String,
 
     x: RoutingType,
 }
 
-impl<RoutingType: RoutingAlgo> CoreServer<RoutingType> {
+impl<RoutingType: RoutingAlgo, JT> CoreServer<RoutingType, JT> {
     pub fn new(
         host: String,
         port: u32,
@@ -49,11 +48,11 @@ impl<RoutingType: RoutingAlgo> CoreServer<RoutingType> {
 
         println!("Thread count is {}", thread_count);
 
-        let (sender, receiver) = mpsc::channel::<Job>();
+        // let (sender, receiver) = mpsc::channel::<Job>();
 
-        let rx = Arc::new(Mutex::new(receiver));
+        // let rx = Arc::new(Mutex::new(receiver));
 
-        let thread_pool = CoreThreadPool::create_threads(thread_count, rx);
+        // let thread_pool = CoreThreadPool::create_threads(thread_count, rx);
 
         Self {
             host,

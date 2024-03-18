@@ -1,4 +1,4 @@
-use crate::thread_pool::ThreadPool;
+use crate::{channels::Channel, thread_pool::ThreadPool};
 
 pub mod default;
 // pub mod lc;
@@ -14,14 +14,14 @@ pub enum ALGO_TYPES {
     Default,
 }
 
-pub enum ThreadCollector {
+pub enum ThreadCollector<TP> {
     SimulatedThreadPool(Vec<String>),
-    ActualThreadPool(),
+    ActualThreadPool(TP),
 }
 
 pub trait RoutingAlgo {
     // this will initialize the algo
-    fn new<X>(mpsc_channel: X, thread_pool: ThreadCollector) -> Self;
+    fn new<X: Channel, TC>(mpsc_channel: X, thread_pool: ThreadCollector<TC>) -> Self;
 
     // this will run it
     // fn start(&self) -> ();
