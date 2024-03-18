@@ -7,8 +7,14 @@ mod mock;
 
 // pub use mock::MockChannel;
 
-pub trait Channel<T> {
+pub trait Channel<JobType> {
     fn create_mpsc(no_of_required_producers: u32) -> Self;
-    fn get_producers(&self) -> &Vec<Sender<T>>;
-    fn get_consumer(&self) -> &Receiver<T>;
+
+    // TODO: convert to reference if necessary
+    fn get_producers(&self) -> Vec<Sender<JobType>>;
+    fn get_consumer(&self) -> Receiver<JobType>;
 }
+
+// should take the no of producers and provide a struct
+// with the n producers and 1 consumer... does it do that?? yes
+// it also has getters for producer and consumer so that it can be used outside -- this might need refactoring in the future

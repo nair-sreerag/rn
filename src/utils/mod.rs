@@ -94,7 +94,6 @@ impl Utils {
         Ok(true)
     }
 
-    // TODO: UNCOMMENT THIS AFTER WRITING THE TEST CASES
     pub fn parse_to_json<json_blue_print>(
         path_to_file: &str,
     ) -> Result<json_blue_print, JSONErrorTypes>

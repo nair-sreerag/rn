@@ -84,7 +84,7 @@ mod tests {
     static VEC_CAP: usize = 10;
 
     #[test]
-    fn test_this_once() {
+    fn check_if_producer_and_consumer_work() {
         use rand;
 
         let mock = MockChannel::<i32>::create_mpsc(5);

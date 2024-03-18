@@ -2,6 +2,7 @@ use std::{
     any,
     fs::read_to_string,
     io::{BufRead, BufReader, Error, Read, Write},
+    marker::PhantomData,
     net::{TcpListener, TcpStream},
     sync::{
         mpsc::{self, Receiver, Sender},
@@ -13,30 +14,44 @@ use regex::Regex;
 // Content-Length: 101
 
 use crate::{
+    channels::Channel,
     request::{CoreRequestParser, Request},
     routing_algos::RoutingAlgo,
     thread_pool::ThreadPool,
     CoreThreadPool,
 };
 
-use super::{Job, Server};
+use super::{Job, JobWithoutBox, Server};
 
-pub struct CoreServer<RoutingType: RoutingAlgo, JobType> {
+pub struct CoreServer<
+    ChannelType: Channel<Job>,
+    ThreadPoolType: ThreadPool<Job>,
+    RoutingType: RoutingAlgo<Job, ChannelType, ThreadPoolType>,
+    // RoutingType: RoutingAlgo<Job, dyn Channel<JobWithoutBox>, dyn ThreadPool<Job>>,
+> {
+    _phantom_channel_type: PhantomData<ChannelType>,
+    _phantom_threadpool_type: PhantomData<ThreadPoolType>,
+
     host: String,
     port: u32,
 
-    s_port: u32,
+    server_port: u32,
     thread_count: usize,
     server_handle: Option<()>,
-    sender: mpsc::Sender<JobType>,
+    // sender: mpsc::Sender<JobType>,
     // receiver: Arc<Mutex<Receiver<()>>>,
-    thread_pool: CoreThreadPool<Job>,
+    // thread_pool: CoreThreadPool<Job>,
     algo_name: String,
-
-    x: RoutingType,
+    routing_algo: RoutingType,
 }
 
-impl<RoutingType: RoutingAlgo, JT> CoreServer<RoutingType, JT> {
+impl<
+        ChannelType: Channel<Job>,
+        ThreadPoolType: ThreadPool<Job>,
+        RoutingType: RoutingAlgo<Job, ChannelType, ThreadPoolType>,
+        // RoutingType: RoutingAlgo<Job>
+    > CoreServer<RoutingType, ChannelType, ThreadPoolType>
+{
     pub fn new(
         host: String,
         port: u32,
@@ -57,17 +72,17 @@ impl<RoutingType: RoutingAlgo, JT> CoreServer<RoutingType, JT> {
         Self {
             host,
             port,
-            s_port,
+            server_port: s_port,
             thread_count,
             // get this from the configuration file passed
             server_handle: Some(()),
-            sender,
+            // sender,
             // receiver: rx,
-            thread_pool,
+            // thread_pool,
 
             // TODO: again, get from the config
             algo_name: String::from("rr"),
-            x: routing_algo,
+            routing_algo,
         }
     }
 
@@ -113,57 +128,60 @@ impl<RoutingType: RoutingAlgo, JT> CoreServer<RoutingType, JT> {
     }
 }
 
-impl<R: RoutingAlgo> Server for CoreServer<R> {
-    fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
-        let complete_address: String = format!("{}:{}", self.host, self.port);
+// impl<R: RoutingAlgo<Job>> Server for CoreServer<R> {
+//     fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
+//         let complete_address: String = format!("{}:{}", self.host, self.port);
 
-        let server_binding = TcpListener::bind(complete_address);
+//         let server_binding = TcpListener::bind(complete_address);
 
-        let server_binding_status = match server_binding {
-            Ok(v) => Ok(v),
-            Err(e) => Err(e),
-        };
+//         let server_binding_status = match server_binding {
+//             Ok(v) => Ok(v),
+//             Err(e) => Err(e),
+//         };
 
-        server_binding_status
-    }
+//         server_binding_status
+//     }
 
-    fn start<F>(&self, server_handle: std::net::TcpListener, executor_function: F)
-    where
-        F: FnOnce(std::net::TcpStream) + Send + Copy + 'static,
-    {
-        println!(
-            "Server is now listening on http://{}:{}",
-            self.host, self.port
-        );
+//     fn start<F>(&self, server_handle: std::net::TcpListener, executor_function: F)
+//     where
+//         F: FnOnce(std::net::TcpStream) + Send + Copy + 'static,
+//     {
+//         println!(
+//             "Server is now listening on http://{}:{}",
+//             self.host, self.port
+//         );
 
-        for l in server_handle.incoming() {
-            println!("got an incoming",);
-            let stream = l.unwrap();
+//         for l in server_handle.incoming() {
+//             println!("got an incoming",);
+//             let stream = l.unwrap();
 
-            // self.handle_incoming_request(stream);
+//             // self.handle_incoming_request(stream);
 
-            // executor_function(stream);
+//             // executor_function(stream);
 
-            let job = Box::new(move || executor_function(stream));
+//             let job = Box::new(move || executor_function(stream));
 
-            self.sender.send(job).unwrap();
-        }
-    }
+//             // self.sender.send(job).unwrap();
 
-    fn get_permissible_limit() -> u32 {
-        // TODO: change this
+//             self.routing_algo.start(job);
+//             //
+//         }
+//     }
 
-        20
-    }
+//     fn get_permissible_limit() -> u32 {
+//         // TODO: change this
 
-    // fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
-    //     let buf_reader = BufReader::new(&mut stream);
-    //     let http_request: Vec<_> = buf_reader
-    //         .lines()
-    //         .map(|result| result.unwrap())
-    //         .take_while(|line| !line.is_empty())
-    //         .collect();
+//         20
+//     }
 
-    //     println!("Request: {:#?}", http_request);
-    // }
-}
+//     // fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
+//     //     let buf_reader = BufReader::new(&mut stream);
+//     //     let http_request: Vec<_> = buf_reader
+//     //         .lines()
+//     //         .map(|result| result.unwrap())
+//     //         .take_while(|line| !line.is_empty())
+//     //         .collect();
+
+//     //     println!("Request: {:#?}", http_request);
+//     // }
+// }

@@ -1,47 +1,38 @@
-use crate::channels::Channel;
+use std::{str::FromStr, sync::mpsc::Sender, thread};
 
-use super::{RoutingAlgo, ThreadCollector};
+use crate::{channels::Channel, thread_pool::ThreadPool};
 
-pub struct DefaultRouting<ChannelType, ThreadPoolType> {
+use super::RoutingAlgo;
+
+pub struct DefaultRouting<JobType> {
+    producer: Sender<JobType>,
     name: String,
-    consumer: ChannelType,
-    threads: ThreadPoolType,
+    threads: Vec<thread::JoinHandle<JobType>>,
 }
 
-// this will take a struct which has 1 sender and 1 receiver
-// and apply arc<mutex>
-// to share the 1 receiver amongst multiple threads
+impl<
+        JobType: Send + FnOnce() + 'static,
+        ChannelType: Channel<JobType>,
+        ThreadPoolType: ThreadPool<JobType>,
+    > RoutingAlgo<JobType, ChannelType, ThreadPoolType> for DefaultRouting<JobType>
+{
+    fn new(channel_struct: ChannelType, thread_pool_struct: ThreadPoolType) -> Self {
+        let producer = channel_struct.get_producers();
 
-impl<C, T> RoutingAlgo for DefaultRouting<C, T> {
-    fn new<ChannelGeneric: Channel, TC>(
-        mpsc: ChannelGeneric,
-        thread_pool: ThreadCollector<TC>,
-    ) -> Self {
-        // let (sender, receiver) = mpsc;
-
-        let t = match thread_pool {
-            ThreadCollector::SimulatedThreadPool(p) => panic!("Simulation should not run here"),
-            ThreadCollector::ActualThreadPool(a) => a,
-        };
-
-        // return a struct with all the required initializations
-        // -
-        // every thread should share the mutex receiver
+        let threads = thread_pool_struct.get_threads();
 
         DefaultRouting {
-            name: String::from("DEFAULT"),
-            threads: t,
-            consumer: mpsc.m,
+            name: String::from("sdasd"),
+            producer: producer[0],
+            threads,
         }
     }
 
-    // fn start() {}
+    fn process_incoming_request(&self, executor_function: JobType) -> () {
+        // run this algo
 
-    // fn assign_to_thread() {}
-}
+        println!(":got a new job ----- ");
 
-#[cfg(test)]
-mod tests {
-
-    use super::*;
+        self.producer.send(executor_function);
+    }
 }

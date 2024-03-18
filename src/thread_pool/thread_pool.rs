@@ -17,21 +17,22 @@ pub struct CoreThreadPool<JobType> {
 }
 
 // remove this send here
-impl<JT: FnOnce() + Send + 'static> ThreadPool for CoreThreadPool<JT> {
-    fn create_threads<JobType: FnOnce() + Send + 'static>(
+impl<JobType: FnOnce() + Send + 'static> ThreadPool<JobType> for CoreThreadPool<JobType> {
+    fn create_threads(
         // &mut self,
         no_of_threads: usize,
-        receiver: ReceiverTypes<Receiver<JobType>>,
+        // receiver: ReceiverTypes<Receiver<JobType>>,
+        receiver: Receiver<JobType>,
     ) -> Self {
-        let mut threads: Vec<thread::JoinHandle<JT>> = Vec::new();
+        let mut threads: Vec<thread::JoinHandle<JobType>> = Vec::new();
 
-        let resolved_receiver = match receiver {
-            ReceiverTypes::MPSCType(job) => Arc::new(Mutex::new(job)),
-            // ReceiverTypes::VecType(_) => panic!("This should not come in an actual application!"),
-            _ => {
-                panic!("This is an invalid state for the implementation");
-            }
-        };
+        // let resolved_receiver = match receiver {
+        //     ReceiverTypes::MPSCType(job) => Arc::new(Mutex::new(job)),
+        //     // ReceiverTypes::VecType(_) => panic!("This should not come in an actual application!"),
+        //     _ => {
+        //         panic!("This is an invalid state for the implementation");
+        //     }
+        // };
 
         if no_of_threads == 1 {
             // no need to do mutex... unnecessary overhead
@@ -43,8 +44,10 @@ impl<JT: FnOnce() + Send + 'static> ThreadPool for CoreThreadPool<JT> {
             //     let job = resolved_receiver.recv();
             // }))
         } else {
+            let arced_mutex = Arc::new(Mutex::new(receiver));
+
             for i in 0..no_of_threads {
-                let receiver = Arc::clone(&resolved_receiver);
+                let receiver = Arc::clone(&arced_mutex);
 
                 let thread_handle = thread::spawn(move || loop {
                     let job = receiver.lock().unwrap().recv().unwrap();
@@ -63,9 +66,6 @@ impl<JT: FnOnce() + Send + 'static> ThreadPool for CoreThreadPool<JT> {
 
         println!("initializing the threads");
 
-        // self.threads = Some(threads);
-        // &self
-
         CoreThreadPool {
             // TODO: this should be the name of config being taken from
             // the conf file
@@ -75,6 +75,10 @@ impl<JT: FnOnce() + Send + 'static> ThreadPool for CoreThreadPool<JT> {
             name: String::from("yolo thread pool"),
             threads,
         }
+    }
+
+    fn get_threads(&self) -> Vec<thread::JoinHandle<JobType>> {
+        self.threads
     }
 }
 

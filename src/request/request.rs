@@ -251,7 +251,7 @@ impl Request for CoreRequestParser {
         // TODO: implement this
 
         for header in headers_to_add {
-            self.headers.push(format!("{}: {}",));
+            // self.headers.push(format!("{}: {}",));
         }
 
         *self
