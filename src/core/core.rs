@@ -50,7 +50,7 @@ impl<
         ThreadPoolType: ThreadPool<Job>,
         RoutingType: RoutingAlgo<Job, ChannelType, ThreadPoolType>,
         // RoutingType: RoutingAlgo<Job>
-    > CoreServer<RoutingType, ChannelType, ThreadPoolType>
+    > CoreServer<ChannelType, ThreadPoolType, RoutingType>
 {
     pub fn new(
         host: String,
@@ -83,6 +83,9 @@ impl<
             // TODO: again, get from the config
             algo_name: String::from("rr"),
             routing_algo,
+
+            _phantom_channel_type: PhantomData,
+            _phantom_threadpool_type: PhantomData,
         }
     }
 
@@ -128,60 +131,65 @@ impl<
     }
 }
 
-// impl<R: RoutingAlgo<Job>> Server for CoreServer<R> {
-//     fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
-//         let complete_address: String = format!("{}:{}", self.host, self.port);
+impl<
+        ChannelType: Channel<Job>,
+        ThreadPoolType: ThreadPool<Job>,
+        RoutingType: RoutingAlgo<Job, ChannelType, ThreadPoolType>,
+    > Server for CoreServer<ChannelType, ThreadPoolType, RoutingType>
+{
+    fn get_server_handle(&self) -> Result<std::net::TcpListener, std::io::Error> {
+        let complete_address: String = format!("{}:{}", self.host, self.port);
 
-//         let server_binding = TcpListener::bind(complete_address);
+        let server_binding = TcpListener::bind(complete_address);
 
-//         let server_binding_status = match server_binding {
-//             Ok(v) => Ok(v),
-//             Err(e) => Err(e),
-//         };
+        let server_binding_status = match server_binding {
+            Ok(v) => Ok(v),
+            Err(e) => Err(e),
+        };
 
-//         server_binding_status
-//     }
+        server_binding_status
+    }
 
-//     fn start<F>(&self, server_handle: std::net::TcpListener, executor_function: F)
-//     where
-//         F: FnOnce(std::net::TcpStream) + Send + Copy + 'static,
-//     {
-//         println!(
-//             "Server is now listening on http://{}:{}",
-//             self.host, self.port
-//         );
+    fn start<F>(&self, server_handle: std::net::TcpListener, executor_function: F)
+    where
+        F: FnOnce(std::net::TcpStream) + Send + Copy + 'static,
+    {
+        println!(
+            "Server is now listening on http://{}:{}",
+            self.host, self.port
+        );
 
-//         for l in server_handle.incoming() {
-//             println!("got an incoming",);
-//             let stream = l.unwrap();
+        for l in server_handle.incoming() {
+            println!("got an incoming",);
+            let stream = l.unwrap();
 
-//             // self.handle_incoming_request(stream);
+            // self.handle_incoming_request(stream);
 
-//             // executor_function(stream);
+            // executor_function(stream);
 
-//             let job = Box::new(move || executor_function(stream));
+            let job = Box::new(move || executor_function(stream));
 
-//             // self.sender.send(job).unwrap();
+            // self.sender.send(job).unwrap();
 
-//             self.routing_algo.start(job);
-//             //
-//         }
-//     }
+            self.routing_algo.process_incoming_request(job);
+            //
+        }
+    }
 
-//     fn get_permissible_limit() -> u32 {
-//         // TODO: change this
+    fn get_permissible_limit() -> u32 {
+        // TODO: change this
 
-//         20
-//     }
+        20
+    }
 
-//     // fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
-//     //     let buf_reader = BufReader::new(&mut stream);
-//     //     let http_request: Vec<_> = buf_reader
-//     //         .lines()
-//     //         .map(|result| result.unwrap())
-//     //         .take_while(|line| !line.is_empty())
-//     //         .collect();
+    // fn handle_incoming_request_server(&self, mut stream: std::net::TcpStream) {
+    //     let buf_reader = BufReader::new(&mut stream);
+    //     let http_request: Vec<_> = buf_reader
+    //         .lines()
+    //         .map(|result| result.unwrap())
+    //         .take_while(|line| !line.is_empty())
+    //         .collect();
 
-//     //     println!("Request: {:#?}", http_request);
-//     // }
-// }
+    //     println!("Request: {:#?}", http_request);
+    // }
+}

@@ -34,12 +34,12 @@ impl<C> Channel<C> for MockChannel<C> {
         }
     }
 
-    fn get_consumer(&self) -> &std::sync::mpsc::Receiver<C> {
-        &self.consumer
+    fn get_consumer(&self) -> std::sync::mpsc::Receiver<C> {
+        self.consumer
     }
 
-    fn get_producers(&self) -> &Vec<std::sync::mpsc::Sender<C>> {
-        &self.producers
+    fn get_producers(&self) -> Vec<std::sync::mpsc::Sender<C>> {
+        self.producers
     }
 }
 

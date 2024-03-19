@@ -21,8 +21,11 @@ use routing_algos::{
     ALGO_TYPES,
 };
 
-use crate::core::Job;
+use crate::core::{Job, Server};
 
+use crate::routing_algos::default::DefaultRouting;
+use crate::routing_algos::RoutingAlgo;
+use crate::thread_pool::ThreadPool;
 use crate::{
     channels::{Channel, CoreChannel},
     //     core::Job,
@@ -35,14 +38,19 @@ fn main() {
 
     let algo: ALGO_TYPES = ALGO_TYPES::Default;
 
-    let mut routing_algo;
-
     // // check the number of threads that can be made
     // // and pass it to the routing algos below
 
     // initialize the mpsc struct
     // initialize the thread_pool
     // pass both to the selected algorithm
+
+    const channel_core: CoreChannel<Job> = CoreChannel::<Job>::create_mpsc(5);
+
+    const t: CoreThreadPool<Job> =
+        CoreThreadPool::<Job>::create_threads(2, channel_core.get_consumer());
+
+    const routing_algo: DefaultRouting<Job> = default::DefaultRouting::new(channel_core, t);
 
     match algo {
         ALGO_TYPES::Default => {
@@ -55,14 +63,9 @@ fn main() {
 
             // c.create_mpsc(1);
 
-            let channel_core = CoreChannel::<Job>::create_mpsc(5);
             // channel_core.get_producers::<Job>()
             // thread pool
             //
-            let t: CoreThreadPool<_> =
-                CoreThreadPool::<Job>::create_threads(2, channel_core.get_consumer());
-
-            routing_algo = default::DefaultRouting::new(channel_core, t);
         }
         ALGO_TYPES::LeastConnection => {}
         ALGO_TYPES::RoundRobin => {} //routing_algo = rr::RoundRobin::new(),
@@ -70,14 +73,28 @@ fn main() {
         ALGO_TYPES::LeastRecentlyUsed => {}
     }
 
-    let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10, routing_algo);
+    let core_server = CoreServer::<CoreChannel<Job>, CoreThreadPool<Job>, DefaultRouting<Job>>::new(
+        String::from("localhost"),
+        10000,
+        443,
+        10,
+        routing_algo,
+    );
 
+    // core_server.start(
+    //     match core_server.get_server_handle() {
+    //         Ok(server) => server,
+    //         Err(error) => panic!("{}", error),
+    //     },
+    //     CoreServer::handle_incoming_request,
+    //     core_server.handle_incoming_request(),
+    // );
+    //
     core_server.start(
         match core_server.get_server_handle() {
             Ok(server) => server,
             Err(error) => panic!("{}", error),
         },
-        CoreServer::handle_incoming_request,
-        core_server.handle_incoming_request(),
-    );
+        // CoreServer::handle_incoming_request,
+    )
 }
