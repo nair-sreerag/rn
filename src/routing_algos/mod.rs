@@ -9,6 +9,7 @@ pub enum ALGO_TYPES {
 }
 
 pub mod default;
+pub mod rr;
 
 pub trait RoutingAlgo {
     // initialize with all the required stuff

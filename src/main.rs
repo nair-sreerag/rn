@@ -7,6 +7,8 @@ use routing_algos::ALGO_TYPES;
 use crate::core::{CoreServer, Server};
 
 fn main() {
+    // read the config here
+
     let routing_algos: ALGO_TYPES = ALGO_TYPES::Default;
 
     match routing_algos {
