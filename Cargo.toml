@@ -10,9 +10,8 @@ edition = "2021"
 
 [dependencies]
 playground = { path = "./playground" }
-
-# 
 cargo-watch = "8.4.1"
 regex = "1.10.3"
 serde = "1.0.193"
 serde_json = "1.0.108"
+rand = "0.8.5"

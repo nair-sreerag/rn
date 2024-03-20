@@ -1,15 +1,16 @@
+use std::sync::mpsc::Receiver;
+
 use super::RoutingAlgo;
 
-pub struct RoundRobin {}
+// pub struct RoundRobin {
+//     senders: Vec<Sender<Job>>,
+//     receivers: Vec<Receiver<Job>>,
+// }
 
-impl RoutingAlgo for RoundRobin {
-    fn new() -> Self {
-        RoundRobin {}
-    }
+// impl RoutingAlgo for RoundRobin {
+//     fn new(sender_count: u32, thread_count: u32) -> Self {
+//         RoundRobin {}
+//     }
 
-    fn start(&self) -> () {}
-}
-
-#[cfg(test)]
-
-pub mod tests {}
+//     fn process_job(&self, executor_function: crate::core::Job) {}
+// }

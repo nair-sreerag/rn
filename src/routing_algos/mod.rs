@@ -1,13 +1,18 @@
-pub mod rr;
+use crate::core::Job;
 
 pub enum ALGO_TYPES {
     RoundRobin,
-    LeaseConnection,
+    LeastConnection,
     LeastRecentlyUsed,
+    WeightedRoundRobin,
+    Default,
 }
 
-pub trait RoutingAlgo {
-    fn new() -> Self;
+pub mod default;
+pub mod rr;
 
-    fn start(&self) -> ();
+pub trait RoutingAlgo {
+    // initialize with all the required stuff
+    fn new(sender_count: u32, thread_count: u32) -> Self;
+    fn process_job(&self, executor_function: Job);
 }

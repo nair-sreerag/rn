@@ -1,34 +1,27 @@
-// mod channels;
 mod core;
-mod pool;
 mod request;
-
 mod routing_algos;
 
-pub use core::CoreServer;
-use std::io::{BufRead, BufReader};
+use routing_algos::ALGO_TYPES;
 
-use crate::core::Server;
-pub use pool::CoreThreadPool;
-
-extern crate playground;
+use crate::core::{CoreServer, Server};
 
 fn main() {
-    println!("Hello, world!");
+    // read the config here
 
-    let mut rr = playground::round_robin::init(5);
+    let routing_algos: ALGO_TYPES = ALGO_TYPES::Default;
 
-    rr.start();
+    match routing_algos {
+        ALGO_TYPES::Default => {}
+        ALGO_TYPES::LeastConnection => {}
+        ALGO_TYPES::RoundRobin => {} //routing_algo = rr::RoundRobin::new(),
+        ALGO_TYPES::WeightedRoundRobin => {}
+        ALGO_TYPES::LeastRecentlyUsed => {}
+    }
 
-    return;
+    println!("Hello, World");
 
-    let core_server = CoreServer::new(String::from("localhost"), 10000, 443, 10);
+    let server = core::CoreServer::new();
 
-    core_server.start(
-        match core_server.get_server_handle() {
-            Ok(server) => server,
-            Err(error) => panic!("{}", error),
-        },
-        CoreServer::handle_incoming_request,
-    );
+    server.start(CoreServer::handle_incoming_request)
 }
