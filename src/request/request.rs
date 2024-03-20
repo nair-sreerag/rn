@@ -247,14 +247,15 @@ impl CoreRequestParser {
 }
 
 impl Request for CoreRequestParser {
-    fn add_headers(&self, headers_to_add: Vec<Header>) -> Self {
+    fn add_headers(&mut self, headers_to_add: Vec<Header>) {
         // TODO: implement this
 
         for header in headers_to_add {
-            // self.headers.push(format!("{}: {}",));
+            self.headers
+                .push(format!("{}: {}", header.key, header.value));
         }
 
-        *self
+        // self
     }
 
     // fn replace_headers(

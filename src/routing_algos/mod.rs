@@ -1,4 +1,4 @@
-use crate::{channels::Channel, thread_pool::ThreadPool};
+use crate::core::Job;
 
 pub enum ALGO_TYPES {
     RoundRobin,
@@ -10,13 +10,8 @@ pub enum ALGO_TYPES {
 
 pub mod default;
 
-pub trait RoutingAlgo<
-    JobType: Send + FnOnce() + 'static,
-    ChannelType: Channel<JobType>,
-    ThreadPoolType: ThreadPool<JobType>,
->
-{
-    fn new(channel_struct: ChannelType, thread_pool_struct: ThreadPoolType) -> Self;
-
-    fn process_incoming_request(&self, executor_function: JobType) -> ();
+pub trait RoutingAlgo {
+    // initialize with all the required stuff
+    fn new(sender_count: u32, thread_count: u32) -> Self;
+    fn process_job(&self, executor_function: Job);
 }

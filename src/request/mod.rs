@@ -3,6 +3,8 @@
 // forward to the converned destination server
 
 mod request;
+use std::fmt::Display;
+
 use regex::Regex;
 pub use request::CoreRequestParser;
 
@@ -21,6 +23,15 @@ pub struct Header {
     value: PermissibleHeaderValues,
 }
 
+impl Display for PermissibleHeaderValues {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Text(text) => write!(f, "{}", text),
+            Self::Number(number) => write!(f, "{}", number.to_string()),
+        }
+    }
+}
+
 pub trait Request {
     // fn parse_request(stream: std::net::TcpStream) -> Vec<String>;
 
@@ -32,7 +43,7 @@ pub trait Request {
 
     // this wont create a new entity; it will
     // just add the required headers and return it back
-    fn add_headers(&self, headers_to_add: Vec<Header>) -> Self;
+    fn add_headers(&mut self, headers_to_add: Vec<Header>);
 
     // fn delete_headers();
 }

@@ -1,38 +1,60 @@
-use std::{str::FromStr, sync::mpsc::Sender, thread};
+use std::{
+    sync::{
+        mpsc::{self, Receiver, Sender},
+        Arc, Mutex,
+    },
+    thread,
+};
 
-use crate::{channels::Channel, thread_pool::ThreadPool};
+use crate::core::Job;
 
 use super::RoutingAlgo;
 
-pub struct DefaultRouting<JobType> {
-    producer: Sender<JobType>,
-    name: String,
-    threads: Vec<thread::JoinHandle<JobType>>,
+pub struct DefaultRouting {
+    sender: Sender<Job>,
+    receivers: Vec<thread::JoinHandle<Job>>,
+    no_of_senders: u32,
 }
 
-impl<
-        JobType: Send + FnOnce() + 'static,
-        ChannelType: Channel<JobType>,
-        ThreadPoolType: ThreadPool<JobType>,
-    > RoutingAlgo<JobType, ChannelType, ThreadPoolType> for DefaultRouting<JobType>
-{
-    fn new(channel_struct: ChannelType, thread_pool_struct: ThreadPoolType) -> Self {
-        let producer = channel_struct.get_producers();
+impl RoutingAlgo for DefaultRouting {
+    fn new(sender_count: u32, thread_count: u32) -> Self {
+        // default routing has a sender and n receivers
+        // the receivers are all assigned to m threads - n : m
+        // the sender receives the message and emits it
+        // a random receiver picks it up and processes it
+        // no specialised algorithm is used in this
 
-        let threads = thread_pool_struct.get_threads();
+        let (sender, receiver) = mpsc::channel::<Job>();
+
+        let mut sender_collector: Vec<Sender<Job>> = Vec::new();
+        let mut receiver_collector: Vec<thread::JoinHandle<Job>> = Vec::new();
+        let arced_receiver = Arc::new(Mutex::new(receiver));
+
+        for i in 0..thread_count {
+            let cloned_receiver = Arc::clone(&arced_receiver);
+
+            let thread = thread::spawn(move || loop {
+                let job = cloned_receiver.lock().unwrap().recv().unwrap();
+
+                println!(
+                    "request is currently being handled by thread - {:?}",
+                    thread::current().id()
+                );
+
+                job();
+            });
+        }
 
         DefaultRouting {
-            name: String::from("sdasd"),
-            producer: producer[0],
-            threads,
+            sender,
+            no_of_senders: sender_count,
+            receivers: receiver_collector,
         }
     }
 
-    fn process_incoming_request(&self, executor_function: JobType) -> () {
-        // run this algo
+    fn process_job(&self, executor_function: Job) {
+        println!("sending code to a random thread");
 
-        println!(":got a new job ----- ");
-
-        self.producer.send(executor_function);
+        self.sender.send(executor_function).unwrap();
     }
 }
