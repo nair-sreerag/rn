@@ -89,7 +89,7 @@ impl CoreRequestParser {
                         }
                     }
                     '\n' => {
-                        println!("got \\n");
+                        // println!("got \\n");
 
                         single_line_collector.push(character);
 

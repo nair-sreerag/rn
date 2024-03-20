@@ -4,6 +4,8 @@ mod routing_algos;
 
 use routing_algos::ALGO_TYPES;
 
+use crate::core::{CoreServer, Server};
+
 fn main() {
     let routing_algos: ALGO_TYPES = ALGO_TYPES::Default;
 
@@ -16,4 +18,8 @@ fn main() {
     }
 
     println!("Hello, World");
+
+    let server = core::CoreServer::new();
+
+    server.start(CoreServer::handle_incoming_request)
 }
