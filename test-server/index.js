@@ -5,9 +5,12 @@ const PORT = process.env.PORT || 35577;
 app.get("/hello-world", async (req, res) => {
   console.log("got a request");
 
-  return res.json({
-    message: "Hello, world!",
-  });
+  setTimeout(() => {
+    return res.json({
+      message: "Hello, world!",
+      ts: Date.now(),
+    });
+  }, 2000);
 });
 
 // app.get("*", (req, res) => {
