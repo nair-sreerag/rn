@@ -52,7 +52,7 @@ impl RoutingAlgo for DefaultRouting {
         }
     }
 
-    fn process_job(&self, executor_function: Job) {
+    fn process_job(&mut self, executor_function: Job) {
         println!("sending code to a random thread");
 
         self.sender.send(executor_function).unwrap();

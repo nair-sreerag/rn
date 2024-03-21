@@ -14,5 +14,5 @@ pub mod rr;
 pub trait RoutingAlgo {
     // initialize with all the required stuff
     fn new(sender_count: u32, thread_count: u32) -> Self;
-    fn process_job(&self, executor_function: Job);
+    fn process_job(&mut self, executor_function: Job);
 }

@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     request::CoreRequestParser,
-    routing_algos::{default::DefaultRouting, RoutingAlgo},
+    routing_algos::{default::DefaultRouting, rr::RoundRobin, RoutingAlgo},
 };
 
 use super::{Job, Server};
@@ -84,7 +84,8 @@ impl Server for CoreServer {
         );
 
         //TODO; remove this
-        let default_algo = DefaultRouting::new(1, 5);
+        // let mut default_algo = DefaultRouting::new(1, 5);
+        let mut default_algo = RoundRobin::new(100, 5);
 
         for l in server_binding.incoming() {
             println!("Got an incoming request");

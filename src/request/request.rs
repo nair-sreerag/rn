@@ -68,7 +68,7 @@ impl CoreRequestParser {
 
         let character_buffer = Self::parse_request_stream_in_chunks(&stream, Some(50));
 
-        println!("ccc {:?}", character_buffer);
+        // println!("ccc {:?}", character_buffer);
 
         for character in character_buffer.chars() {
             if start_collecting_body {
@@ -99,9 +99,9 @@ impl CoreRequestParser {
 
                         if found_next_line_symbol == true {
                             start_collecting_body = true;
-                            println!(
-                                "pushing to global collector and flushing the local collector"
-                            );
+                            // println!(
+                            //     "pushing to global collector and flushing the local collector"
+                            // );
 
                             collector.push(String::from(
                                 &single_line_collector
@@ -233,7 +233,7 @@ impl CoreRequestParser {
 
                 parsed_stream.push_str(&parsed_string);
 
-                println!("breaking");
+                // println!("breaking");
                 break;
             } else {
                 let cow_to_string = buffer_to_cow.into_owned();
