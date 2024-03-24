@@ -45,5 +45,11 @@ pub trait Request {
     // just add the required headers and return it back
     // fn add_headers(&mut self, headers_to_add: Vec<Header>);
 
-    // fn delete_headers();
+    fn new(stream: &std::net::TcpStream) -> Self;
+
+    fn replace_uri(&mut self) -> bool;
+
+    fn add_header(&mut self) -> bool;
+
+    fn delete_header(&mut self) -> bool;
 }

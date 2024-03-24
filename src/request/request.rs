@@ -32,7 +32,50 @@ enum RegexExtractors {
 }
 
 impl CoreRequestParser {
-    pub fn new(mut stream: &std::net::TcpStream) -> Self {
+    pub fn parse_request_stream_in_chunks(
+        mut stream: &std::net::TcpStream,
+        chunk_size: Option<usize>,
+    ) -> String {
+        let mut parsed_stream: String = String::new();
+
+        loop {
+            let mut buffer = vec![
+                0;
+                match chunk_size {
+                    Some(size) => size,
+                    _ => 1024,
+                }
+            ];
+            stream.read(&mut buffer).unwrap();
+
+            let buffer_to_cow = String::from_utf8_lossy(&buffer);
+
+            let last_char_in_the_stream = buffer_to_cow.chars().last().unwrap();
+
+            if last_char_in_the_stream == '\0' {
+                let parsed_string: String = buffer_to_cow
+                    .chars()
+                    // '\0' marks the end of the request as a whole
+                    .take_while(|c| *c != '\0')
+                    .collect::<String>();
+
+                parsed_stream.push_str(&parsed_string);
+
+                // println!("breaking");
+                break;
+            } else {
+                let cow_to_string = buffer_to_cow.into_owned();
+
+                parsed_stream.push_str(&cow_to_string);
+            }
+        }
+
+        parsed_stream
+    }
+}
+
+impl Request for CoreRequestParser {
+    fn new(mut stream: &std::net::TcpStream) -> Self {
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
                 name: RegexExtractors::CONTENT_LENGTH,
@@ -203,100 +246,59 @@ impl CoreRequestParser {
             host_port: destination_port,
         }
     }
-
-    pub fn parse_request_stream_in_chunks(
-        mut stream: &std::net::TcpStream,
-        chunk_size: Option<usize>,
-    ) -> String {
-        let mut parsed_stream: String = String::new();
-
-        loop {
-            let mut buffer = vec![
-                0;
-                match chunk_size {
-                    Some(size) => size,
-                    _ => 1024,
-                }
-            ];
-            stream.read(&mut buffer).unwrap();
-
-            let buffer_to_cow = String::from_utf8_lossy(&buffer);
-
-            let last_char_in_the_stream = buffer_to_cow.chars().last().unwrap();
-
-            if last_char_in_the_stream == '\0' {
-                let parsed_string: String = buffer_to_cow
-                    .chars()
-                    // '\0' marks the end of the request as a whole
-                    .take_while(|c| *c != '\0')
-                    .collect::<String>();
-
-                parsed_stream.push_str(&parsed_string);
-
-                // println!("breaking");
-                break;
-            } else {
-                let cow_to_string = buffer_to_cow.into_owned();
-
-                parsed_stream.push_str(&cow_to_string);
-            }
-        }
-
-        parsed_stream
-    }
 }
 
-impl Request for CoreRequestParser {
-    // fn add_headers(&mut self, headers_to_add: Vec<Header>) {
-    //     // TODO: implement this
+// impl Request for CoreRequestParser {
+// fn add_headers(&mut self, headers_to_add: Vec<Header>) {
+//     // TODO: implement this
 
-    //     for header in headers_to_add {
-    //         self.headers
-    //             .push(format!("{}: {}", header.key, header.value));
-    //     }
+//     for header in headers_to_add {
+//         self.headers
+//             .push(format!("{}: {}", header.key, header.value));
+//     }
 
-    //     // self
-    // }
+//     // self
+// }
 
-    // fn replace_headers(
-    //     mut header: &str,
-    //     expression: &str,
-    //     replacement_values: Vec<super::ReplacementStruct>,
-    // ) -> String {
-    //     let regexp = Regex::new(expression).unwrap();
+// fn replace_headers(
+//     mut header: &str,
+//     expression: &str,
+//     replacement_values: Vec<super::ReplacementStruct>,
+// ) -> String {
+//     let regexp = Regex::new(expression).unwrap();
 
-    //     header = regexp.replace_all(&header, |captures| {
-    //         for r in replacement_values {
+//     header = regexp.replace_all(&header, |captures| {
+//         for r in replacement_values {
 
-    //             if let Some(word) = captures[&r.key[..]] {
+//             if let Some(word) = captures[&r.key[..]] {
 
-    //             }
+//             }
 
-    //         }
-    //     });
+//         }
+//     });
 
-    //     String::from(header)
-    // }
+//     String::from(header)
+// }
 
-    // // FIXME: DEPR!!
-    // fn parse_request(mut stream: std::net::TcpStream) -> Vec<String> {
-    //     let buf_reader = BufReader::new(&mut stream);
+// // FIXME: DEPR!!
+// fn parse_request(mut stream: std::net::TcpStream) -> Vec<String> {
+//     let buf_reader = BufReader::new(&mut stream);
 
-    //     // this should handle different use cases
-    //     //  for example when the POST request has a body,
-    //     // u need to parse that separately after the perceived
-    //     // terminator \r\n\r\n of a normal get request.
-    //     //PS.  it marks the end of the headers section of any request
+//     // this should handle different use cases
+//     //  for example when the POST request has a body,
+//     // u need to parse that separately after the perceived
+//     // terminator \r\n\r\n of a normal get request.
+//     //PS.  it marks the end of the headers section of any request
 
-    //     // use the content length to find out how much the size of data is
+//     // use the content length to find out how much the size of data is
 
-    //     buf_reader
-    //         .lines()
-    //         .map(|result| result.unwrap())
-    //         .take_while(|line| !line.is_empty())
-    //         .collect()
-    // }
-}
+//     buf_reader
+//         .lines()
+//         .map(|result| result.unwrap())
+//         .take_while(|line| !line.is_empty())
+//         .collect()
+// }
+// }
 
 #[cfg(test)]
 mod tests {
