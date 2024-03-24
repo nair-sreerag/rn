@@ -247,16 +247,16 @@ impl CoreRequestParser {
 }
 
 impl Request for CoreRequestParser {
-    fn add_headers(&mut self, headers_to_add: Vec<Header>) {
-        // TODO: implement this
+    // fn add_headers(&mut self, headers_to_add: Vec<Header>) {
+    //     // TODO: implement this
 
-        for header in headers_to_add {
-            self.headers
-                .push(format!("{}: {}", header.key, header.value));
-        }
+    //     for header in headers_to_add {
+    //         self.headers
+    //             .push(format!("{}: {}", header.key, header.value));
+    //     }
 
-        // self
-    }
+    //     // self
+    // }
 
     // fn replace_headers(
     //     mut header: &str,

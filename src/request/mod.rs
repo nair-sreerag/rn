@@ -43,7 +43,7 @@ pub trait Request {
 
     // this wont create a new entity; it will
     // just add the required headers and return it back
-    fn add_headers(&mut self, headers_to_add: Vec<Header>);
+    // fn add_headers(&mut self, headers_to_add: Vec<Header>);
 
     // fn delete_headers();
 }

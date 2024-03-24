@@ -42,24 +42,20 @@
 
 [
   {
+    // lets created this for now
+    //
     "type": "http/events/stream",
-    "servers": [
-      {
-        "id": "",
-        "algorithm": "",
-        "addresses": [""]
-      }
-    ],
-
-    "location": [
-      {
-        "match": "some regex or suburl",
-        "actions": [
-          {
-            "action": "proxy_pass, url rewriting, redirecting, caching, ratelimiting, error_page, auth_basic, add_header "
-          }
-        ]
-      }
-    ]
+    "specs": {
+      "location": [
+        {
+          "match": "some regex or suburl",
+          "actions": [
+            {
+              "action": "adding, deleting, rewriting a header || "
+            }
+          ]
+        }
+      ]
+    }
   }
 ]
