@@ -9,5 +9,7 @@ impl LocationStage for ProxyPassStage {
         ProxyPassStage {}
     }
 
-    fn process(self) -> String {}
+    fn process(self) -> String {
+        String::new()
+    }
 }

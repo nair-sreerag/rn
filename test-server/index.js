@@ -10,7 +10,7 @@ app.get("/hello-world", async (req, res) => {
       message: "Hello, world!",
       ts: Date.now(),
     });
-  }, 2000);
+  }, 0);
 });
 
 // app.get("*", (req, res) => {

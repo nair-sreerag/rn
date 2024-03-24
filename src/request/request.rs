@@ -1,4 +1,7 @@
-use std::io::{BufRead, BufReader, Read};
+use std::{
+    io::Error,
+    io::{BufRead, BufReader, Read},
+};
 
 use super::{Header, Request};
 
@@ -14,9 +17,18 @@ pub struct CoreRequestParser {
 
     // TODO: this is dicey;
     // what exactly should be its type?
-    // it can be string, json or binary (??) (in case of file uploads)
+    // it can be string,
+    // json or binary (??) (in case of file uploads)
+    // Me thinks it should be Vec<bytes> or string
     pub body: String,
     pub method: String,
+
+    pub content_type: String,
+
+    pub auth_type: String,
+    pub cookie: String,
+    pub auth_token: String,
+    pub encoding: String,
 }
 
 struct RegexStruct<'a> {
@@ -29,6 +41,10 @@ enum RegexExtractors {
     CONTENT_LENGTH,
     METHOD_AND_URL,
     HOST_DATA,
+    CONTENT_TYPE,
+    AUTHORIZATION,
+    COOKIE,
+    ACCEPT_ENCODING,
 }
 
 impl CoreRequestParser {
@@ -53,9 +69,9 @@ impl CoreRequestParser {
             let last_char_in_the_stream = buffer_to_cow.chars().last().unwrap();
 
             if last_char_in_the_stream == '\0' {
+                // '\0' marks the end of the request as a whole
                 let parsed_string: String = buffer_to_cow
                     .chars()
-                    // '\0' marks the end of the request as a whole
                     .take_while(|c| *c != '\0')
                     .collect::<String>();
 
@@ -72,10 +88,8 @@ impl CoreRequestParser {
 
         parsed_stream
     }
-}
 
-impl Request for CoreRequestParser {
-    fn new(mut stream: &std::net::TcpStream) -> Self {
+    pub fn new(mut stream: &std::net::TcpStream) -> Self {
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
                 name: RegexExtractors::CONTENT_LENGTH,
@@ -91,6 +105,26 @@ impl Request for CoreRequestParser {
                 name: RegexExtractors::HOST_DATA,
                 regex: r"Host:\s+(?<host_base_url>.*):(?<host_port>.*)",
                 keys: vec!["host_base_url", "host_port"],
+            },
+            RegexStruct {
+                name: RegexExtractors::CONTENT_TYPE,
+                regex: r"Content-Type:\s*(?<content_type>.*)\s*;*",
+                keys: vec!["content_type"],
+            },
+            RegexStruct {
+                name: RegexExtractors::AUTHORIZATION,
+                regex: r"Authorization:\s*(?<auth_type>.*)\s+(?<auth_token>.*)", // COMEBACK TO THIS FOR DIFF AUTH TYPES
+                keys: vec!["auth_type", "auth_token"],
+            },
+            RegexStruct {
+                name: RegexExtractors::COOKIE,
+                regex: r"Cookie:\s*(?<cookie>.*)",
+                keys: vec!["cookie"],
+            },
+            RegexStruct {
+                name: RegexExtractors::ACCEPT_ENCODING,
+                regex: r"Accept-Encoding:\s*(?<encoding>.*)", //Accept-Encoding: gzip, deflate
+                keys: vec!["encoding"],
             },
         ];
 
@@ -108,8 +142,13 @@ impl Request for CoreRequestParser {
         let mut request_url = String::new();
         let mut destination_base = String::new();
         let mut destination_port: u32 = 0;
+        let mut content_type = String::new();
+        let mut auth_type = String::new();
+        let mut auth_token = String::new();
+        let mut cookie = String::new();
+        let mut encoding = String::new();
 
-        let character_buffer = Self::parse_request_stream_in_chunks(&stream, Some(50));
+        let character_buffer = Self::parse_request_stream_in_chunks(&stream, Some(500));
 
         // println!("ccc {:?}", character_buffer);
 
@@ -204,6 +243,63 @@ impl Request for CoreRequestParser {
                                         }
                                     }
 
+                                    RegexExtractors::CONTENT_TYPE => {
+                                        for c in &collector {
+                                            match expr.captures(c) {
+                                                Some(some_capture) => {
+                                                    content_type = some_capture["content_type"]
+                                                        .parse()
+                                                        .unwrap()
+                                                }
+                                                None => (),
+                                            }
+                                        }
+                                    }
+
+                                    RegexExtractors::AUTHORIZATION => {
+                                        for c in &collector {
+                                            match expr.captures(c) {
+                                                Some(some_capture) => {
+                                                    auth_type =
+                                                        some_capture["auth_type"].parse().unwrap();
+
+                                                    auth_token =
+                                                        some_capture["auth_token"].parse().unwrap();
+
+                                                    println!(
+                                                        "zzz ->>> {} and {}",
+                                                        auth_type, auth_token
+                                                    );
+                                                }
+                                                None => (),
+                                            }
+                                        }
+                                    }
+
+                                    RegexExtractors::COOKIE => {
+                                        for c in &collector {
+                                            match expr.captures(c) {
+                                                Some(some_capture) => {
+                                                    cookie =
+                                                        some_capture["cookie"].parse().unwrap();
+                                                }
+                                                None => (),
+                                            }
+                                        }
+                                    }
+
+                                    RegexExtractors::ACCEPT_ENCODING => {
+                                        for c in &collector {
+                                            match expr.captures(c) {
+                                                Some(some_capture) => {
+                                                    encoding =
+                                                        some_capture["encoding"].parse().unwrap();
+                                                }
+                                                None => (),
+                                            }
+                                        }
+                                    }
+
                                     _ => panic!("This call will never occur"),
                                 }
                             }
@@ -244,7 +340,28 @@ impl Request for CoreRequestParser {
             url: request_url,
             host_base: destination_base,
             host_port: destination_port,
+            content_type,
+            auth_type,
+            cookie,
+            auth_token,
+            encoding,
         }
+    }
+}
+
+impl Request for CoreRequestParser {
+    fn add_header(&mut self, header_to_push: String) -> Result<bool, Error> {
+        self.headers.push(header_to_push);
+
+        Ok(true) // should always be the case
+    }
+
+    // fn delete_header(&mut self) -> Result<bool, Error> {}
+
+    fn replace_destination_uri(&mut self, new_uri: String) -> Result<bool, Error> {
+        self.headers.pop().unwrap();
+
+        Ok(true)
     }
 }
 
