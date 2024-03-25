@@ -3,7 +3,7 @@
 // forward to the converned destination server
 
 mod request;
-use std::fmt::Display;
+use std::{fmt::Display, io::Error};
 
 use regex::Regex;
 pub use request::CoreRequestParser;
@@ -45,5 +45,11 @@ pub trait Request {
     // just add the required headers and return it back
     // fn add_headers(&mut self, headers_to_add: Vec<Header>);
 
-    // fn delete_headers();
+    // fn new(stream: &std::net::TcpStream) -> Self;
+
+    fn replace_destination_uri(&mut self, new_uri: String) -> Result<bool, Error>;
+
+    fn add_header(&mut self, new_header: String) -> Result<bool, Error>;
+
+    // fn delete_header(&mut self) -> Result<bool, Error>;
 }
