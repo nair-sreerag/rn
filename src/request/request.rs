@@ -10,7 +10,7 @@ use regex::Regex;
 #[derive(Debug)]
 pub struct CoreRequestParser {
     pub headers: Vec<String>,
-    pub url: String,
+    pub host_path: String,
     // pub host: String,
     pub host_base: String,
     pub host_port: u32,
@@ -29,6 +29,8 @@ pub struct CoreRequestParser {
     pub cookie: String,
     pub auth_token: String,
     pub encoding: String,
+
+    pub source_address: String,
 }
 
 struct RegexStruct<'a> {
@@ -90,6 +92,10 @@ impl CoreRequestParser {
     }
 
     pub fn new(mut stream: &std::net::TcpStream) -> Self {
+        let source_address = stream.peer_addr().unwrap();
+
+        println!("ssss ->>> {:?}", source_address.to_string());
+
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
                 name: RegexExtractors::CONTENT_LENGTH,
@@ -337,7 +343,7 @@ impl CoreRequestParser {
             headers: collector,
             body: body_collector,
             method: request_method,
-            url: request_url,
+            host_path: request_url,
             host_base: destination_base,
             host_port: destination_port,
             content_type,
@@ -345,6 +351,7 @@ impl CoreRequestParser {
             cookie,
             auth_token,
             encoding,
+            source_address: source_address.to_string(),
         }
     }
 }
