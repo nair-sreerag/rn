@@ -13,8 +13,8 @@ pub struct RoundRobin {
     received_request_count: usize,
 }
 
-impl RoutingAlgo for RoundRobin {
-    fn new(sender_count: u32, thread_count: u32) -> Self {
+impl RoundRobin {
+    pub fn new(sender_count: u32, thread_count: u32) -> Self {
         // it should be a 1-1 relationship
         // i.e. 1 sender to 1 receiver
 
@@ -47,7 +47,9 @@ impl RoutingAlgo for RoundRobin {
             senders: sender_collector,
         }
     }
+}
 
+impl RoutingAlgo for RoundRobin {
     fn process_job(&mut self, executor_function: crate::core::Job) {
         let total_sender_length = self.senders.len();
 

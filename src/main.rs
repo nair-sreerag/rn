@@ -1,10 +1,13 @@
+mod block;
 mod config;
 mod core;
+mod modules;
 mod request;
 mod routing_algos;
 
 use ::config::{Config, File};
-use config::CoreConfig;
+use config::*;
+use modules::*;
 use once_cell::sync::Lazy;
 use routing_algos::ALGO_TYPES;
 
@@ -30,24 +33,17 @@ pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
 });
 
 fn main() {
-    // read the config here
-    // config::CoreConfig::CO();
-    // *config::CONFIG;
-    //
+    let x = CoreConfig::load();
 
-    println!("{:?}", CONFIG.last_name);
+    // let z: CoreConfig = x.unwrap();
+
+    // println!("->>>> {:?}", z.items[1].first_name);
 
     // config::CoreConfig::CO
 
-    let routing_algos: ALGO_TYPES = ALGO_TYPES::Default;
-
-    match routing_algos {
-        ALGO_TYPES::Default => {}
-        ALGO_TYPES::LeastConnection => {}
-        ALGO_TYPES::RoundRobin => {} //routing_algo = rr::RoundRobin::new(),
-        ALGO_TYPES::WeightedRoundRobin => {}
-        ALGO_TYPES::LeastRecentlyUsed => {}
-    }
+    // check if upstream array is provided, if yes parse them
+    //  to parse - determine the server types - server tyoe only for now
+    // default or health check
 
     println!("Hello, World");
 

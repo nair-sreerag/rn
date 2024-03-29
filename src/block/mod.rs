@@ -1,8 +1,4 @@
-use crate::routing_algos::{RoutingAlgo, ROUTING_ALGORITHMS};
-
-use self::upstream::ServerList;
-
-mod upstream;
+use crate::routing_algos::RoutingAlgo;
 
 pub enum BLOCKS {
     UPSTREAM,
@@ -11,8 +7,8 @@ pub enum BLOCKS {
     EVENTS,
 }
 
-pub trait CoreBlock<ROUTING_ALGORITHM: RoutingAlgo> {
-    fn new(sl: Vec<ServerList>, algo: Option<ROUTING_ALGORITHMS>) -> Self;
+pub trait CoreBlock {
+    // fn new<ROUTING_ALGORITHM: RoutingAlgo>(sl: Vec<i32>, algo: ROUTING_ALGORITHM) -> Self;
 
     fn process(&self);
 }
