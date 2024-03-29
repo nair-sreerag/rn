@@ -2,10 +2,9 @@
   "configs": [
     {
       "block_type": "http",
-      "clusers": [
+      "clusters": [
         {
           "id": "cluster_name",
-          "algorithm": "",
           "server_configs": [
             {
               "is_backup": true,
@@ -15,7 +14,7 @@
                 "is_disabled": false,
                 "url": "localhost:2222/api/v1/health",
                 "timeout": 3000,
-                "tries": "5 or null"
+                "tries": 3
               }
             }
           ]
@@ -23,7 +22,7 @@
       ],
       "location": [
         {
-          "match": "/api/v1/",
+          "match_sub_uri": "/api/v1/",
           "stages": [
             {
               "action": "rewrite",

@@ -3,14 +3,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::Stage;
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone)]
 pub struct StageLayout {
-    stage_type: Stage,
+    action: Stage,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct LocationConfigurationComposition {
-    url: String,              // the sub api to match with
+    match_sub_uri: String,    // the sub api to match with
     stages: Vec<StageLayout>, // order matters
 }
 
@@ -31,3 +31,43 @@ pub struct LocationConfigurationComposition {
 //         deserializer.deserialize_str()
 //     }
 // }
+
+impl<'de> Deserialize<'de> for StageLayout {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
+
+        // this will throw error in the upcoming match
+        let current_stage = value["action"].as_str().unwrap_or("");
+
+        match current_stage {
+            "rewrite" => Ok(StageLayout {
+                action: Stage::Rewrite {
+                    // original_string: value["original_string"].as_str().unwrap().to_string(),
+                    grouping_regex: value["grouping_regex"].as_str().unwrap().to_string(),
+                    replacement_regex: value["replacement_regex"].as_str().unwrap().to_string(),
+                    should_redirect: value["should_redirect"].as_bool().unwrap(),
+                },
+            }),
+
+            "proxyPass" => Ok(StageLayout {
+                action: Stage::ProxyPass {},
+            }), // for reverse proxy
+
+            // "AddHeader" => Ok(()), // add a header
+
+            // "AddAuthHeader" => Ok(),
+
+            // "ModifyHeader" => Ok(),
+
+            // "LimitConnections" => Ok(),
+
+            // "ProxyCache" => Ok(),
+
+            // "StaticFile" => Ok(),
+            _ => Err(serde::de::Error::custom("Invalid stage provided.")),
+        }
+    }
+}

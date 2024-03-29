@@ -68,7 +68,7 @@ impl<'de> Deserialize<'de> for ClusterLayout {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct ClusterConfigurationComposition {
-    identifier: String, // the name that will be used in the reverse proxy
+    id: String, // the name that will be used in the reverse proxy
     algorithm: ALGO_TYPES,
     server_configs: Vec<ClusterLayout>,
 }
@@ -80,9 +80,12 @@ impl<'de> Deserialize<'de> for ClusterConfigurationComposition {
     {
         let value: serde_json::Value = Deserialize::deserialize(deserializer)?;
 
-        let enum_value = value["algorithm"].as_str().unwrap();
+        let enum_value = value["algorithm"].as_str().unwrap_or("default");
 
-        println!("running deserializer of ClusterConfigurationComposition");
+        println!(
+            "running deserializer of ClusterConfigurationComposition ->>> {:?}",
+            enum_value
+        );
 
         match enum_value {
             // FIXME;
@@ -90,17 +93,22 @@ impl<'de> Deserialize<'de> for ClusterConfigurationComposition {
             // "LeastConnection" => Ok(),
             // "LeastRecentlyUsed" => Ok(),
             // "WeightedRoundRobin" => Ok(),
-            "Default" => Ok(ClusterConfigurationComposition {
-                identifier: value["identifier"].as_str().unwrap().to_string(),
+            "default" => Ok(ClusterConfigurationComposition {
+                id: value["identifier"].as_str().unwrap_or("zzz").to_string(),
                 algorithm: ALGO_TYPES::Default,
                 server_configs: serde_json::from_value(value["server_configs"].clone()).unwrap(),
             }),
 
-            _ => Ok(ClusterConfigurationComposition {
-                identifier: value["identifier"].as_str().unwrap().to_string(),
-                algorithm: ALGO_TYPES::Default,
-                server_configs: serde_json::from_value(value["server_configs"].clone()).unwrap(),
-            }),
+            _ => {
+                println!("I am here");
+
+                Ok(ClusterConfigurationComposition {
+                    id: value["algorithm"].as_str().unwrap_or("zzz").to_string(),
+                    algorithm: ALGO_TYPES::Default,
+                    server_configs: serde_json::from_value(value["server_configs"].clone())
+                        .unwrap(),
+                })
+            }
         }
     }
 }
