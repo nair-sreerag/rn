@@ -1,53 +1,29 @@
+mod block;
+mod composer;
 mod config;
 mod core;
+mod modules;
 mod request;
 mod routing_algos;
 
 use ::config::{Config, File};
-use config::CoreConfig;
-use once_cell::sync::Lazy;
-use routing_algos::ALGO_TYPES;
+use config::CONFIG;
+use modules::*;
+use std::process;
 
 use crate::core::{CoreServer, Server};
 
-pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
-    const partial_path: &str = "conf/config.json";
-
-    let mut abs_path = std::env::current_dir().unwrap();
-    abs_path.push(partial_path);
-
-    let full_path = match abs_path.to_str() {
-        Some(p) => p,
-        None => panic!("Something wrong with the path"),
-    };
-
-    let builder = Config::builder()
-        .add_source(File::with_name(full_path))
-        .build()
-        .unwrap();
-
-    builder.try_deserialize().unwrap()
-});
-
 fn main() {
-    // read the config here
-    // config::CoreConfig::CO();
-    // *config::CONFIG;
-    //
+    // let z: CoreConfig = x.unwrap();
 
-    println!("{:?}", CONFIG.last_name);
+    println!("->>>> {:?}", CONFIG.configs[0].block_type);
 
-    // config::CoreConfig::CO
+    let pid = process::id();
 
-    let routing_algos: ALGO_TYPES = ALGO_TYPES::Default;
-
-    match routing_algos {
-        ALGO_TYPES::Default => {}
-        ALGO_TYPES::LeastConnection => {}
-        ALGO_TYPES::RoundRobin => {} //routing_algo = rr::RoundRobin::new(),
-        ALGO_TYPES::WeightedRoundRobin => {}
-        ALGO_TYPES::LeastRecentlyUsed => {}
-    }
+    println!("process id is ->> {:?}", pid);
+    // check if upstream array is provided, if yes parse them
+    //  to parse - determine the server types - server tyoe only for now
+    // default or health check
 
     println!("Hello, World");
 

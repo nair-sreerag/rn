@@ -1,4 +1,38 @@
 {
-  "first_name": "Sreerag",
-  "last_name": "Nair"
+  "configs": [
+    {
+      "block_type": "http",
+      "clusters": [
+        {
+          "id": "cluster_name",
+          "server_configs": [
+            {
+              "is_backup": true,
+              "is_active": false,
+              "base_url": "loaclhost:2222/api/v1",
+              "health_check": {
+                "is_disabled": false,
+                "url": "localhost:2222/api/v1/health",
+                "timeout": 3000,
+                "tries": 3
+              }
+            }
+          ]
+        }
+      ],
+      "location": [
+        {
+          "match_sub_uri": "/api/v1/",
+          "stages": [
+            {
+              "action": "rewrite",
+              "grouping_regex": "/sdfsdfds/sdfdsfds",
+              "replacement_regex": "sdfsdfsdfdsf",
+              "should_redirect": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

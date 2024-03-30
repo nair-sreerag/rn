@@ -1,63 +1,84 @@
+use std::env::current_dir;
+
 use serde::{Deserialize, Serialize};
 
-use config::{Config, File};
+use config::{Config, ConfigError, File};
 use once_cell::sync::Lazy;
 
-mod modules;
+mod layout;
+
+use self::layout::{
+    cluster::ClusterConfigurationComposition, location::LocationConfigurationComposition,
+    ConfigRootLevelComposition,
+};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CoreConfig {
-    pub first_name: String,
-    pub last_name: String,
+    pub configs: Vec<ConfigRootLevelComposition>,
 }
 
 // TODO: Take it up as a challenge
 // impl <T> TryInto <T> for PathBuf<T> { }
 
+impl CoreConfig {
+    pub fn load() -> Result<Self, ConfigError> {
+        // there can be multiple json files in this folder
+        // each json file which points to a specific service maybe
+        let inner_path = "conf/config.json";
+        let mut abs_path = current_dir().unwrap();
+
+        abs_path.push(inner_path);
+
+        let config_builder = Config::builder()
+            .add_source(File::with_name(&abs_path.to_string_lossy()))
+            .build()
+            .unwrap();
+
+        let z = config_builder.try_deserialize();
+
+        println!("zz m {:?}", z);
+
+        z
+    }
+
+    pub fn get(self) -> Self {
+        self
+    }
+}
+
 pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
-    const partial_path: &str = "conf/config.json";
+    let inner_path = "conf/config.json";
+    let mut abs_path = current_dir().unwrap();
 
-    let mut abs_path = std::env::current_dir().unwrap();
-    abs_path.push(partial_path);
+    abs_path.push(inner_path);
 
-    let full_path = match abs_path.to_str() {
-        Some(p) => p,
-        None => panic!("Something wrong with the path"),
-    };
-
-    let builder = Config::builder()
-        .add_source(File::with_name(full_path))
+    let config_builder = Config::builder()
+        .add_source(File::with_name(&abs_path.to_string_lossy()))
         .build()
         .unwrap();
 
-    builder.try_deserialize().unwrap()
+    let z = config_builder.try_deserialize();
+
+    println!("zz m {:?}", z);
+
+    z.unwrap()
 });
 
-impl CoreConfig {
-    // pub fn load() -> Lazy<CoreConfig> {
-    //     pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
-    //         const partial_path: &str = "conf/config.json";
+// pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
+//     const partial_path: &str = "conf/config.json";
 
-    //         let mut abs_path = std::env::current_dir().unwrap();
-    //         abs_path.push(partial_path);
+//     let mut abs_path = std::env::current_dir().unwrap();
+//     abs_path.push(partial_path);
 
-    //         let full_path = match abs_path.to_str() {
-    //             Some(p) => p,
-    //             None => panic!("Something wrong with the path"),
-    //         };
+//     let full_path = match abs_path.to_str() {
+//         Some(p) => p,
+//         None => panic!("Something wrong with the path"),
+//     };
 
-    //         let builder = Config::builder()
-    //             .add_source(File::with_name(full_path))
-    //             .build()
-    //             .unwrap();
+//     let builder = Config::builder()
+//         .add_source(File::with_name(full_path))
+//         .build()
+//         .unwrap();
 
-    //         builder.try_deserialize().unwrap()
-    //     });
-
-    //     // return CONFIG;
-    // }
-    //
-    //
-
-    // pub fn parse_config(&self) -> bool {}
-}
+//     builder.try_deserialize().unwrap()
+// });

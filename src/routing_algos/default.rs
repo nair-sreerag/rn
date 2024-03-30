@@ -16,8 +16,8 @@ pub struct DefaultRouting {
     no_of_senders: u32,
 }
 
-impl RoutingAlgo for DefaultRouting {
-    fn new(sender_count: u32, thread_count: u32) -> Self {
+impl DefaultRouting {
+    pub fn new(sender_count: u32, thread_count: u32) -> Self {
         // default routing has a sender and n receivers
         // the receivers are all assigned to m threads - n : m
         // the sender receives the message and emits it
@@ -51,7 +51,9 @@ impl RoutingAlgo for DefaultRouting {
             receivers: receiver_collector,
         }
     }
+}
 
+impl RoutingAlgo for DefaultRouting {
     fn process_job(&mut self, executor_function: Job) {
         println!("sending code to a random thread");
 
