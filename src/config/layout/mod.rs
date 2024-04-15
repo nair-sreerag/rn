@@ -37,7 +37,7 @@ impl<'de> Deserialize<'de> for ConfigRootLevelComposition {
             "http" => Ok(ConfigRootLevelComposition {
                 block_type: BlockType::HTTP,
                 clusters: serde_json::from_value(value["clusters"].clone()).unwrap(),
-                locations: serde_json::from_value(value["location"].clone()).unwrap(),
+                locations: serde_json::from_value(value["locations"].clone()).unwrap(),
             }),
             // "EVENTS" | "STREAM" => {}
             _ => Err(serde::de::Error::custom(

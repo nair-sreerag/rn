@@ -20,7 +20,7 @@
           ]
         }
       ],
-      "location": [
+      "locations": [
         {
           "match_sub_uri": "/api/v1/",
           "stages": [
@@ -29,6 +29,10 @@
               "grouping_regex": "/sdfsdfds/sdfdsfds",
               "replacement_regex": "sdfsdfsdfdsf",
               "should_redirect": false
+            },
+            {
+              "action": "proxy_pass",
+              "url": "http://backend"
             }
           ]
         }

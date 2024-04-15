@@ -20,7 +20,9 @@ pub enum Stage {
         should_redirect: bool,
     },
     AddHeader, // add a header
-    ProxyPass, // for reverse proxy
+    ProxyPass {
+        url: String,
+    }, // for reverse proxy
     AddAuthHeader,
     ModifyHeader,
     LimitConnections,

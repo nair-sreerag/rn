@@ -1,10 +1,10 @@
 mod block;
-mod composer;
 mod config;
 mod core;
 mod modules;
 mod request;
 mod routing_algos;
+mod validator;
 
 use ::config::{Config, File};
 use config::CONFIG;

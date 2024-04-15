@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
@@ -52,8 +54,10 @@ impl<'de> Deserialize<'de> for StageLayout {
                 },
             }),
 
-            "proxyPass" => Ok(StageLayout {
-                action: Stage::ProxyPass {},
+            "proxy_pass" => Ok(StageLayout {
+                action: Stage::ProxyPass {
+                    url: String::from_str("s").unwrap(),
+                },
             }), // for reverse proxy
 
             // "AddHeader" => Ok(()), // add a header

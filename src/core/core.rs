@@ -6,6 +6,7 @@ use std::{
 use crate::{
     request::CoreRequestParser,
     routing_algos::{default::DefaultRouting, rr::RoundRobin, RoutingAlgo},
+    // validator::CoreValidator,
 };
 
 use super::{Job, Server};
@@ -93,6 +94,14 @@ impl Server for CoreServer {
             let stream = l.unwrap();
 
             let job = Box::new(move || executor_function(stream));
+
+            // HERE:
+            // 1. validate the config format
+            // 2. validate the config values
+            // 3. initialize the specific routing algo
+            // 3. send to the algo's process_job()
+
+            // let core_validator = CoreValidator::validate(config);
 
             default_algo.process_job(job)
         }

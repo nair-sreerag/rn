@@ -7,6 +7,8 @@ use once_cell::sync::Lazy;
 
 mod layout;
 
+pub use layout::BLOCK_TYPE;
+
 use self::layout::{
     cluster::ClusterConfigurationComposition, location::LocationConfigurationComposition,
     ConfigRootLevelComposition,
@@ -47,6 +49,7 @@ impl CoreConfig {
 }
 
 pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
+    // TODO: check this
     let inner_path = "conf/config.json";
     let mut abs_path = current_dir().unwrap();
 
@@ -57,11 +60,11 @@ pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
         .build()
         .unwrap();
 
-    let z = config_builder.try_deserialize();
+    let deserialized_config = config_builder.try_deserialize();
 
-    println!("zz m {:?}", z);
+    println!("zz m {:?}", deserialized_config);
 
-    z.unwrap()
+    deserialized_config.unwrap()
 });
 
 // pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
