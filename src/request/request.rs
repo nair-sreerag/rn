@@ -40,13 +40,13 @@ struct RegexStruct<'a> {
 }
 
 enum RegexExtractors {
-    CONTENT_LENGTH,
-    METHOD_AND_URL,
-    HOST_DATA,
-    CONTENT_TYPE,
-    AUTHORIZATION,
-    COOKIE,
-    ACCEPT_ENCODING,
+    ContentLength,
+    MethodAndUrl,
+    HostData,
+    ContentType,
+    Authorization,
+    Cookie,
+    AcceptEncoding,
 }
 
 impl CoreRequestParser {
@@ -98,37 +98,37 @@ impl CoreRequestParser {
 
         let all_regexes: Vec<RegexStruct> = vec![
             RegexStruct {
-                name: RegexExtractors::CONTENT_LENGTH,
+                name: RegexExtractors::ContentLength,
                 regex: r"content-length\s*:\s*(?<name>\d{1,})",
                 keys: vec!["name"],
             },
             RegexStruct {
-                name: RegexExtractors::METHOD_AND_URL,
+                name: RegexExtractors::MethodAndUrl,
                 regex: r"(?<http_method>GET|PUT|POST|DELETE|PATCH|HEAD|OPTIONS|TRACE|CONNECT)\s+(?<http_url>.*)\s+HTTP\/(?<http_version>[0-9.]{3,})",
                 keys: vec!["http_method", "http_url", "http_version"],
             },
             RegexStruct {
-                name: RegexExtractors::HOST_DATA,
+                name: RegexExtractors::HostData,
                 regex: r"Host:\s+(?<host_base_url>.*):(?<host_port>.*)",
                 keys: vec!["host_base_url", "host_port"],
             },
             RegexStruct {
-                name: RegexExtractors::CONTENT_TYPE,
+                name: RegexExtractors::ContentType,
                 regex: r"Content-Type:\s*(?<content_type>.*)\s*;*",
                 keys: vec!["content_type"],
             },
             RegexStruct {
-                name: RegexExtractors::AUTHORIZATION,
+                name: RegexExtractors::Authorization,
                 regex: r"Authorization:\s*(?<auth_type>.*)\s+(?<auth_token>.*)", // COMEBACK TO THIS FOR DIFF AUTH TYPES
                 keys: vec!["auth_type", "auth_token"],
             },
             RegexStruct {
-                name: RegexExtractors::COOKIE,
+                name: RegexExtractors::Cookie,
                 regex: r"Cookie:\s*(?<cookie>.*)",
                 keys: vec!["cookie"],
             },
             RegexStruct {
-                name: RegexExtractors::ACCEPT_ENCODING,
+                name: RegexExtractors::AcceptEncoding,
                 regex: r"Accept-Encoding:\s*(?<encoding>.*)", //Accept-Encoding: gzip, deflate
                 keys: vec!["encoding"],
             },
@@ -200,7 +200,7 @@ impl CoreRequestParser {
                                 let expr = Regex::new(r.regex).unwrap();
 
                                 match r.name {
-                                    RegexExtractors::CONTENT_LENGTH => {
+                                    RegexExtractors::ContentLength => {
                                         for c in &collector {
                                             match expr.captures(&c[..].to_lowercase()) {
                                                 Some(some_capture) => {
@@ -214,7 +214,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::METHOD_AND_URL => {
+                                    RegexExtractors::MethodAndUrl => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -231,7 +231,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::HOST_DATA => {
+                                    RegexExtractors::HostData => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -249,7 +249,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::CONTENT_TYPE => {
+                                    RegexExtractors::ContentType => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -262,7 +262,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::AUTHORIZATION => {
+                                    RegexExtractors::Authorization => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -282,7 +282,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::COOKIE => {
+                                    RegexExtractors::Cookie => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {
@@ -294,7 +294,7 @@ impl CoreRequestParser {
                                         }
                                     }
 
-                                    RegexExtractors::ACCEPT_ENCODING => {
+                                    RegexExtractors::AcceptEncoding => {
                                         for c in &collector {
                                             match expr.captures(c) {
                                                 Some(some_capture) => {

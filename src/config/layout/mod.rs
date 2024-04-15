@@ -9,7 +9,7 @@ pub mod cluster;
 pub mod location;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum BLOCK_TYPE {
+pub enum BlockType {
     HTTP,
     // {
     //     // block_type: String::from(""),
@@ -35,7 +35,7 @@ impl<'de> Deserialize<'de> for ConfigRootLevelComposition {
 
         match enum_value {
             "http" => Ok(ConfigRootLevelComposition {
-                block_type: BLOCK_TYPE::HTTP,
+                block_type: BlockType::HTTP,
                 clusters: serde_json::from_value(value["clusters"].clone()).unwrap(),
                 locations: serde_json::from_value(value["location"].clone()).unwrap(),
             }),
@@ -49,7 +49,7 @@ impl<'de> Deserialize<'de> for ConfigRootLevelComposition {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ConfigRootLevelComposition {
-    pub block_type: BLOCK_TYPE,
+    pub block_type: BlockType,
     pub clusters: Vec<ClusterConfigurationComposition>,
     pub locations: Vec<LocationConfigurationComposition>,
 }

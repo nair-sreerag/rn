@@ -9,7 +9,7 @@
             {
               "is_backup": true,
               "is_active": false,
-              "base_url": "loaclhost:2222/api/v1",
+              "base_url": "localhost:2222/api/v1",
               "health_check": {
                 "is_disabled": false,
                 "url": "localhost:2222/api/v1/health",

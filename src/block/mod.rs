@@ -1,6 +1,6 @@
 use crate::routing_algos::RoutingAlgo;
 
-pub enum BLOCKS {
+pub enum Blocks {
     UPSTREAM,
     LOCATION,
     SERVER,
