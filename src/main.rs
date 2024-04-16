@@ -27,7 +27,7 @@ fn main() {
 
     println!("Hello, World");
 
-    let server = core::CoreServer::new();
+    let server = CoreServer::new();
 
     server.start(CoreServer::handle_incoming_request)
 }

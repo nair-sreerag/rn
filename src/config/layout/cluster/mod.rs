@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::routing_algos::ALGO_TYPES;
+use crate::routing_algos::AlgoTypes;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct HealthCheckLayout {
@@ -69,7 +69,7 @@ impl<'de> Deserialize<'de> for ClusterLayout {
 #[derive(Debug, Serialize, Clone)]
 pub struct ClusterConfigurationComposition {
     pub id: String, // the name that will be used in the reverse proxy
-    pub algorithm: ALGO_TYPES,
+    pub algorithm: AlgoTypes,
     pub server_configs: Vec<ClusterLayout>,
 }
 
@@ -95,7 +95,7 @@ impl<'de> Deserialize<'de> for ClusterConfigurationComposition {
             // "WeightedRoundRobin" => Ok(),
             "default" => Ok(ClusterConfigurationComposition {
                 id: value["identifier"].as_str().unwrap_or("zzz").to_string(),
-                algorithm: ALGO_TYPES::Default,
+                algorithm: AlgoTypes::Default,
                 server_configs: serde_json::from_value(value["server_configs"].clone()).unwrap(),
             }),
 
@@ -104,7 +104,7 @@ impl<'de> Deserialize<'de> for ClusterConfigurationComposition {
 
                 Ok(ClusterConfigurationComposition {
                     id: value["algorithm"].as_str().unwrap_or("zzz").to_string(),
-                    algorithm: ALGO_TYPES::Default,
+                    algorithm: AlgoTypes::Default,
                     server_configs: serde_json::from_value(value["server_configs"].clone())
                         .unwrap(),
                 })

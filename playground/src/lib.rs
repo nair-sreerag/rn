@@ -5,14 +5,14 @@ use rand::Rng;
 pub mod playground {}
 
 #[derive(Debug)]
-pub struct printer {
+pub struct Printer {
     id: u32,
     job: Vec<u32>,
 }
 
-impl printer {
-    fn new(id: u32) -> printer {
-        printer {
+impl Printer {
+    fn new(id: u32) -> Printer {
+        Printer {
             id,
             job: Vec::new(),
         }
@@ -24,24 +24,24 @@ impl printer {
 }
 
 #[derive(Debug)]
-pub struct round_robin {
-    threads: Vec<printer>,
+pub struct RoundRobin {
+    threads: Vec<Printer>,
     record_keeper: HashMap<u32, u32>,
     next: u32,
 }
 
-impl round_robin {
-    pub fn init(vec_number: u32) -> round_robin {
-        let mut threads: Vec<printer> = Vec::with_capacity(vec_number.try_into().unwrap());
+impl RoundRobin {
+    pub fn init(vec_number: u32) -> RoundRobin {
+        let mut threads: Vec<Printer> = Vec::with_capacity(vec_number.try_into().unwrap());
         let mut hmap = HashMap::<u32, u32>::new();
 
         for i in 0..vec_number {
-            threads.push(printer::new(i));
+            threads.push(Printer::new(i));
 
             hmap.insert(i, 0);
         }
 
-        round_robin {
+        RoundRobin {
             threads,
             next: 0,
             record_keeper: hmap,
@@ -120,21 +120,21 @@ pub mod tests {
 
         #[test]
         pub fn remove_tasks() {
-            struct v {
+            struct V {
                 thread_id: u32,
                 job_id: u32,
             }
 
             let checker = vec![
-                v {
+                V {
                     job_id: 10,
                     thread_id: 10,
                 },
-                v {
+                V {
                     job_id: 10,
                     thread_id: 10,
                 },
-                v {
+                V {
                     job_id: 10,
                     thread_id: 10,
                 },

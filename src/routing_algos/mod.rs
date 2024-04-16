@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::Job;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub enum ALGO_TYPES {
+pub enum AlgoTypes {
     RoundRobin,
     LeastConnection,
     LeastRecentlyUsed,
