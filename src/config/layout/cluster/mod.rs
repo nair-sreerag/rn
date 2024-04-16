@@ -96,6 +96,7 @@ impl<'de> Deserialize<'de> for ClusterConfigurationComposition {
             "default" => Ok(ClusterConfigurationComposition {
                 id: value["identifier"].as_str().unwrap_or("zzz").to_string(),
                 algorithm: AlgoTypes::Default,
+
                 server_configs: serde_json::from_value(value["server_configs"].clone()).unwrap(),
             }),
 

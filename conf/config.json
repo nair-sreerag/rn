@@ -4,7 +4,7 @@
       "block_type": "http",
       "clusters": [
         {
-          "id": "cluster_name",
+          "id": "backend",
           "server_configs": [
             {
               "is_backup": true,
@@ -30,6 +30,7 @@
               "replacement_regex": "sdfsdfsdfdsf",
               "should_redirect": false
             },
+
             {
               "action": "proxy_pass",
               "url": "http://backend"

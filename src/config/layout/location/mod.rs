@@ -56,21 +56,22 @@ impl<'de> Deserialize<'de> for StageLayout {
 
             "proxy_pass" => Ok(StageLayout {
                 action: Stage::ProxyPass {
-                    url: String::from_str("s").unwrap(),
+                    url: value["url"].as_str().unwrap().to_string(),
                 },
             }), // for reverse proxy
 
-            // "AddHeader" => Ok(()), // add a header
+            "AddHeader" => todo!(), // add a header
 
-            // "AddAuthHeader" => Ok(),
+            "AddAuthHeader" => todo!(),
 
-            // "ModifyHeader" => Ok(),
+            "ModifyHeader" => todo!(),
 
-            // "LimitConnections" => Ok(),
+            "LimitConnections" => todo!(),
 
-            // "ProxyCache" => Ok(),
+            "ProxyCache" => todo!(),
 
-            // "StaticFile" => Ok(),
+            "StaticFile" => todo!(),
+
             _ => Err(serde::de::Error::custom("Invalid stage provided.")),
         }
     }

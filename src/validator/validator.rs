@@ -26,6 +26,8 @@ impl CoreValidator for CoreConfigValidator {
 
                     for location_block in &block_data.locations {
                         for stage in &location_block.stages {
+                            println!("stage name {:?}", stage);
+
                             match &stage.action {
                                 crate::Stage::ProxyPass { url } => {
                                     // this will extract the domain name
@@ -33,15 +35,17 @@ impl CoreValidator for CoreConfigValidator {
 
                                     //TODO; THIS requires way more work
 
-                                    let regex = r"(?<web_extension>http|https)\:\/\/(?<reverse_proxy_name>.*)";
+                                    let regex = r"(?<web_extension>http|https):\/\/(?<reverse_proxy_cluster_name>.*)";
                                     let regex_ready = Regex::new(regex).unwrap();
 
                                     let mut regex_extracted_cluster_name: String;
 
                                     match regex_ready.captures(&url[..].to_lowercase()) {
                                         Some(some_capture) => {
-                                            regex_extracted_cluster_name =
-                                                some_capture[""].parse().unwrap()
+                                            regex_extracted_cluster_name = some_capture
+                                                ["reverse_proxy_cluster_name"]
+                                                .parse()
+                                                .unwrap()
                                         }
                                         None => panic!(
                                             "Got an improperly constructed proxy_pass command"
@@ -60,9 +64,9 @@ impl CoreValidator for CoreConfigValidator {
                     }
                 }
 
-                BLOCK_TYPE::EVENTS => {}
+                BLOCK_TYPE::EVENTS => todo!(),
 
-                BLOCK_TYPE::STREAM => {}
+                BLOCK_TYPE::STREAM => todo!(),
             }
         }
 
@@ -78,13 +82,19 @@ pub mod tests {
     use super::*;
 
     #[test]
-    pub fn check_core_configurator_for_http_block_type() {
+    pub fn check_core_config_validator_for_http_block_type() {
         let config = CoreConfig::load();
 
         let core_validator = CoreConfigValidator::validate(&config.unwrap());
 
         assert_eq!(1, 1);
     }
-    // pub fn check_core_configurator_for_events_block_type() {}
-    // pub fn check_core_configurator_for_stream_block_type() {}
+
+    #[test]
+    pub fn check_core_config_validator_for_events_block_type() {
+        assert_eq!(1, 1);
+    }
+
+    #[test]
+    pub fn check_core_config_validator_for_stream_block_type() {}
 }

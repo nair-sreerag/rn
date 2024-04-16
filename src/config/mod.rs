@@ -1,3 +1,7 @@
+// WHAT IS IT??
+// this module will check if the passed config file has all the
+// required keys or not. Does NOT check the validity of the data
+
 use std::env::current_dir;
 
 use serde::{Deserialize, Serialize};

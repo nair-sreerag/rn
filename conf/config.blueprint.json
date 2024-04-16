@@ -4,7 +4,7 @@
       "block_type": "http/events/stream",
       "clusters": [
         {
-          "id": "",
+          "id": "<upstream server cluster name>",
           "algorithm": "",
           "server_configs": [
             {
