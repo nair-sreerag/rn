@@ -88,18 +88,12 @@ impl Server for CoreServer {
         // let mut default_algo = DefaultRouting::new(1, 5);
         let mut default_algo = RoundRobin::new(100, 5);
 
-        for l in server_binding.incoming() {
+        for incoming_connection in server_binding.incoming() {
             println!("Got an incoming request");
 
-            let stream = l.unwrap();
+            let stream = incoming_connection.unwrap();
 
             let job = Box::new(move || executor_function(stream));
-
-            // HERE:
-            // 1. validate the config format
-            // 2. validate the config values
-            // 3. initialize the specific routing algo
-            // 3. send to the algo's process_job()
 
             // let core_validator = CoreValidator::validate(config);
 
@@ -110,6 +104,8 @@ impl Server for CoreServer {
     fn get_permissible_limit(&self) -> u32 {
         // TODO; compute this dynamically
 
-        30
+        30;
+
+        todo!()
     }
 }

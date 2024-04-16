@@ -31,7 +31,7 @@ struct ServerClusterBlock {
     servers: Vec<UpstreamServerStruct>,
 }
 
-impl ServerClusterBlock<T> {
+impl ServerClusterBlock {
     pub fn new(algorithm: String) -> Self {
         let algo = SERVER_TYPE::from_str(&algorithm).unwrap();
 

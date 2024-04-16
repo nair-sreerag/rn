@@ -1,7 +1,23 @@
 {
   "configs": [
     {
-      "block_type": "http/events/stream",
+      // "block_type": "http/events/stream",
+      "block_type": "http",
+
+      // the block which will
+      "listener": {
+        "http": {
+          "listen_on": 80, // default
+
+          "redirect": true // if this is true, then send 302(??) to the browser or whatever
+        },
+
+        "https": {
+          "listen_on": 443, // default
+          "ssl_certificate_path": "",
+          "ssl_certificate_key_path": ""
+        }
+      },
       "clusters": [
         {
           "id": "<upstream server cluster name>",

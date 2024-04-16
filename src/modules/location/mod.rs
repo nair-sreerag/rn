@@ -21,8 +21,8 @@ pub enum Stage {
     },
     AddHeader, // add a header
     ProxyPass {
-        url: String,
-    }, // for reverse proxy
+        url: String, // for reverse proxy
+    },
     AddAuthHeader,
     ModifyHeader,
     LimitConnections,

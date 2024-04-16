@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use crate::config::BLOCK_TYPE;
+use crate::config::BlockType;
 
 use super::CoreValidator;
 
@@ -13,7 +13,7 @@ impl CoreValidator for CoreConfigValidator {
 
             // check for each config provided
             match block_type {
-                BLOCK_TYPE::HTTP => {
+                BlockType::Http => {
                     // the only thing i can find
                     // now is the proxy pass location module
 
@@ -64,9 +64,9 @@ impl CoreValidator for CoreConfigValidator {
                     }
                 }
 
-                BLOCK_TYPE::EVENTS => todo!(),
+                BlockType::Events => todo!(),
 
-                BLOCK_TYPE::STREAM => todo!(),
+                BlockType::Stream => todo!(),
             }
         }
 

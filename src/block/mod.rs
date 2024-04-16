@@ -3,11 +3,16 @@
 
 use crate::routing_algos::RoutingAlgo;
 
-pub enum Blocks {
-    UPSTREAM,
-    LOCATION,
-    SERVER,
-    EVENTS,
+mod cluster;
+mod location;
+
+pub enum BLOCKS {
+    Upstream,
+    Location,
+    Server,
+    Event,
+    Cluster,
+    Listener,
 }
 
 pub trait CoreBlock {

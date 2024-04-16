@@ -14,20 +14,21 @@ use std::process;
 use crate::core::{CoreServer, Server};
 
 fn main() {
+    println!("Hello, World... Starting the proxy server");
+
     // let z: CoreConfig = x.unwrap();
 
-    println!("->>>> {:?}", CONFIG.configs[0].block_type);
+    let core_server = CoreServer::new();
 
-    let pid = process::id();
+    // HERE:
+    // 1. validate the config format - DONE
+    // 2. validate the config values
+    // 3. initialize the specific routing algo
+    // 4. send to the algo's process_job()
 
-    println!("process id is ->> {:?}", pid);
-    // check if upstream array is provided, if yes parse them
-    //  to parse - determine the server types - server tyoe only for now
-    // default or health check
+    // println!("{:?}", CONFIG.configs);
 
     println!("Hello, World");
 
-    let server = CoreServer::new();
-
-    server.start(CoreServer::handle_incoming_request)
+    core_server.start(CoreServer::handle_incoming_request)
 }

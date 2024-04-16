@@ -11,7 +11,7 @@ use once_cell::sync::Lazy;
 
 mod layout;
 
-pub use layout::BLOCK_TYPE;
+pub use layout::BlockType;
 
 use self::layout::{
     cluster::ClusterConfigurationComposition, location::LocationConfigurationComposition,
@@ -40,11 +40,11 @@ impl CoreConfig {
             .build()
             .unwrap();
 
-        let z = config_builder.try_deserialize();
+        let serialized_config = config_builder.try_deserialize();
 
-        println!("zz m {:?}", z);
+        // println!("zz m {:?}", serialized_config);
 
-        z
+        serialized_config
     }
 
     pub fn get(self) -> Self {
@@ -66,7 +66,7 @@ pub static CONFIG: Lazy<CoreConfig> = Lazy::new(|| {
 
     let deserialized_config = config_builder.try_deserialize();
 
-    println!("zz m {:?}", deserialized_config);
+    // println!("zz m {:?}", deserialized_config);
 
     deserialized_config.unwrap()
 });
