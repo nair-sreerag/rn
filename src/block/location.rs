@@ -15,11 +15,11 @@ pub struct ServerLocationBlock {
     stages: Option<Vec<Stage>>,
 }
 
-impl <R : LocationStage> CoreBlock for ServerLocationBlock {
-    fn process(&self, parsed_incoming_request: <R>) {
-        let url = ServerLocationBlock {
-            url: String::from_str("this is a url").unwrap(),
-            stages: None,
-        };
-    }
-}
+// impl <R : LocationStage> CoreBlock for ServerLocationBlock {
+//     fn process(&self, parsed_incoming_request: <R>) {
+//         let url = ServerLocationBlock {
+//             url: String::from_str("this is a url").unwrap(),
+//             stages: None,
+//         };
+//     }
+// }

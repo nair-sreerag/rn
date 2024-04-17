@@ -2,11 +2,22 @@
   "configs": [
     {
       "block_type": "http",
+      "server_http": {
+        "listen_on": 80,
+        "redirect": true
+      },
+      "server_https": {
+        "listen_on": 443,
+        "ssl_certificate_path": "",
+        "ssl_certificate_key_path": ""
+      },
+
       "clusters": [
         {
           "id": "backend",
           "server_configs": [
             {
+              "type": "",
               "is_backup": true,
               "is_active": false,
               "base_url": "localhost:2222/api/v1",

@@ -1,4 +1,5 @@
 mod block;
+// mod collator;
 mod config;
 mod core;
 mod modules;
@@ -11,14 +12,17 @@ use config::CONFIG;
 use modules::*;
 use std::process;
 
-use crate::core::{CoreServer, Server};
+use crate::{
+    config::CoreConfig,
+    core::{CoreServer, Server},
+};
 
 fn main() {
     println!("Hello, World... Starting the proxy server");
 
-    // let z: CoreConfig = x.unwrap();
-
     let core_server = CoreServer::new();
+
+    println!("config ->>> {:?}", CONFIG.configs);
 
     // HERE:
     // 1. validate the config format - DONE
@@ -27,8 +31,6 @@ fn main() {
     // 4. send to the algo's process_job()
 
     // println!("{:?}", CONFIG.configs);
-
-    println!("Hello, World");
 
     core_server.start(CoreServer::handle_incoming_request)
 }
