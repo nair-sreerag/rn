@@ -6,7 +6,7 @@ mod location;
 
 pub use location::ServerLocationBlock;
 
-pub enum BLOCKS {
+pub enum Blocks {
     // Upstream, - isnt this the same thing as Cluster?
     Location,
     Cluster,

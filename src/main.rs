@@ -1,5 +1,7 @@
+#![allow(dead_code)]
 mod block;
 // mod collator;
+
 mod config;
 mod core;
 mod modules;
@@ -7,6 +9,7 @@ mod request;
 mod routing_algos;
 mod validator;
 
+mod composer;
 use ::config::{Config, File};
 use config::CONFIG;
 use modules::*;

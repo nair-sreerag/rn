@@ -20,6 +20,8 @@ pub struct CoreServer {
 
 impl CoreServer {
     pub fn handle_incoming_request(mut stream: std::net::TcpStream) {
+
+
         let parsed_incoming_request = CoreRequestParser::new(&stream);
 
         println!("{:?}", parsed_incoming_request);
@@ -79,10 +81,7 @@ impl Server for CoreServer {
 
         let server_binding = TcpListener::bind(complete_address).unwrap();
 
-        println!(
-            "Server is now listening on http://{}:{}",
-            self.host, self.port
-        );
+        println!("Server is listening on http://{}:{}", self.host, self.port);
 
         //TODO; remove this
         // let mut default_algo = DefaultRouting::new(1, 5);
@@ -98,6 +97,15 @@ impl Server for CoreServer {
             // let core_validator = CoreValidator::validate(config);
 
             default_algo.process_job(job)
+
+            /*
+
+            1. parse every incoming request
+            2.
+            3.
+            4.
+
+            */
         }
     }
 

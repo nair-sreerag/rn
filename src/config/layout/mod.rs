@@ -21,6 +21,8 @@ pub struct ConfigRootLevelComposition {
     pub locations: Vec<LocationConfigurationComposition>,
 }
 
+// https://www.reddit.com/r/Instagram/comments/qxedag/your_account_has_been_permanently_disabled/
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum BlockType {
     Http,

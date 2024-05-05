@@ -11,12 +11,14 @@ use once_cell::sync::Lazy;
 
 mod layout;
 
-pub use layout::BlockType;
+// pub use layout::BlockType;
 
 use self::layout::{
     cluster::ClusterConfigurationComposition, location::LocationConfigurationComposition,
     ConfigRootLevelComposition,
 };
+
+pub use layout::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CoreConfig {

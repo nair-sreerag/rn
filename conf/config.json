@@ -4,12 +4,14 @@
       "block_type": "http",
       "server_http": {
         "listen_on": 80,
-        "redirect": true
+        "redirect": true,
+        "server_names": ["domain1.com", "domain2.com"]
       },
       "server_https": {
         "listen_on": 443,
         "ssl_certificate_path": "",
-        "ssl_certificate_key_path": ""
+        "ssl_certificate_key_path": "",
+        "server_names": ["domain1.com", "domain2.com"]
       },
 
       "clusters": [
